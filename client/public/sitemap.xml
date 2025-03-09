@@ -1,32 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Homepage -->
   <url>
     <loc>https://taqdeer.app/</loc>
-    <lastmod>2023-08-01</lastmod>
+    <lastmod>2023-03-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+  
+  <!-- About Page -->
   <url>
     <loc>https://taqdeer.app/about</loc>
-    <lastmod>2023-08-01</lastmod>
+    <lastmod>2023-03-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+  
+  <!-- Contact Page -->
   <url>
     <loc>https://taqdeer.app/contact</loc>
-    <lastmod>2023-08-01</lastmod>
+    <lastmod>2023-03-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  
+  <!-- Privacy Policy (if you have one) -->
   <url>
     <loc>https://taqdeer.app/privacy</loc>
-    <lastmod>2023-08-01</lastmod>
+    <lastmod>2023-03-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
+  
+  <!-- Terms of Service (if you have one) -->
   <url>
     <loc>https://taqdeer.app/terms</loc>
-    <lastmod>2023-08-01</lastmod>
+    <lastmod>2023-03-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
