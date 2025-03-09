@@ -24,7 +24,10 @@ mongoose.connect(process.env.MONGODB_URI, {
   useUnifiedTopology: true,
 })
 .then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+.catch(err => {
+  console.error('MongoDB connection error:', err);
+  console.log('Server will continue running with limited functionality');
+});
 
 // Middleware
 app.use(cors({
@@ -32,7 +35,8 @@ app.use(cors({
     'http://localhost:3000',
     'https://taqdeer.vercel.app',
     'https://taqdeer-app.vercel.app',
-    'https://taqdeer.app'
+    'https://taqdeer.app',
+    'https://taqdeer-git-main-lirumadevs-projects.vercel.app'  // Add your Vercel preview URL if needed
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
@@ -66,33 +70,58 @@ app.get('/api', (req, res) => {
 // Get usage statistics
 app.get('/api/stats', async (req, res) => {
   try {
+    // Check if database is connected
+    if (mongoose.connection.readyState !== 1) {
+      // If not connected, return default stats
+      return res.json({
+        uniqueVisitors: 0,
+        duasGenerated: 0,
+        duasShared: 0
+      });
+    }
+    
     const stats = await Stats.getSingletonStats();
     res.json(stats);
   } catch (error) {
     console.error('Error fetching stats:', error);
-    res.status(500).json({ error: 'Failed to fetch statistics' });
+    // Return default stats on error
+    res.json({
+      uniqueVisitors: 0,
+      duasGenerated: 0,
+      duasShared: 0
+    });
   }
 });
 
 // Track unique visitor
 app.post('/api/stats/visitor', async (req, res) => {
   try {
+    // Check if database is connected
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(200).json({ success: true, message: 'Database not available, visitor not tracked' });
+    }
+    
     await Stats.incrementVisitors();
     res.status(200).json({ success: true });
   } catch (error) {
     console.error('Error tracking visitor:', error);
-    res.status(500).json({ error: 'Failed to track visitor' });
+    res.status(200).json({ success: true, message: 'Error tracking visitor, but request successful' });
   }
 });
 
 // Track shared du'a
 app.post('/api/stats/shared', async (req, res) => {
   try {
+    // Check if database is connected
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(200).json({ success: true, message: 'Database not available, share not tracked' });
+    }
+    
     await Stats.incrementDuasShared();
     res.status(200).json({ success: true });
   } catch (error) {
     console.error('Error tracking shared du\'a:', error);
-    res.status(500).json({ error: 'Failed to track shared du\'a' });
+    res.status(200).json({ success: true, message: 'Error tracking share, but request successful' });
   }
 });
 
@@ -204,8 +233,15 @@ app.post('/api/dua/generate', async (req, res) => {
       };
     }
     
-    // Increment the dua generation count
-    await Stats.incrementDuasGenerated();
+    // Increment the dua generation count - only if database is connected
+    if (mongoose.connection.readyState === 1) {
+      try {
+        await Stats.incrementDuasGenerated();
+      } catch (error) {
+        console.error('Error incrementing dua count:', error);
+        // Continue even if tracking fails
+      }
+    }
     
     res.json(duaData);
   } catch (error) {
