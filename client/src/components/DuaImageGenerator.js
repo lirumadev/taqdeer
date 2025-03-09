@@ -158,9 +158,13 @@ const DuaImageGenerator = ({ dua, onSuccess, onError, onClose }) => {
         const blob = await response.blob();
         const file = new File([blob], 'taqdeer-dua.png', { type: 'image/png' });
         
+        // Create a more comprehensive sharing text
+        const shareTitle = `${dua.title || 'Islamic Du\'a'} | Taqdeer.app`;
+        const shareText = `Check out this du'a from Taqdeer.app:\n\n"${dua.translation?.substring(0, 100)}${dua.translation?.length > 100 ? '...' : ''}"\n\nSource: ${dua.source || 'Islamic sources'}\n\nFind more authentic du'as at Taqdeer.app`;
+        
         await navigator.share({
-          title: dua.title || 'Du\'a from Taqdeer',
-          text: 'Check out this du\'a from Taqdeer',
+          title: shareTitle,
+          text: shareText,
           files: [file]
         });
         
