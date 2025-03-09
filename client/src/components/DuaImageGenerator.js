@@ -10,7 +10,11 @@ import {
   DialogActions,
   IconButton,
   Stack,
-  Paper
+  Paper,
+  Snackbar,
+  Alert,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -27,8 +31,16 @@ const DuaImageGenerator = ({ dua, onSuccess, onError, onClose }) => {
   const [imageUrl, setImageUrl] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const containerRef = useRef(null);
   const imageRef = useRef(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
+  // Check if Web Share API is supported
+  const isWebShareSupported = typeof navigator !== 'undefined' && navigator.share;
 
   // Generate image automatically when component mounts
   useEffect(() => {
@@ -78,14 +90,16 @@ const DuaImageGenerator = ({ dua, onSuccess, onError, onClose }) => {
     link.download = fileName;
     link.href = imageUrl;
     link.click();
+    
+    showSnackbar('Image saved successfully', 'success');
   };
 
   const handleCopyImage = async () => {
     if (!imageUrl || !imageRef.current) return;
     
     try {
-      // For modern browsers
-      if (navigator.clipboard && navigator.clipboard.write) {
+      // For modern desktop browsers
+      if (navigator.clipboard && navigator.clipboard.write && !isMobile) {
         const response = await fetch(imageUrl);
         const blob = await response.blob();
         await navigator.clipboard.write([
@@ -93,8 +107,16 @@ const DuaImageGenerator = ({ dua, onSuccess, onError, onClose }) => {
             [blob.type]: blob
           })
         ]);
+        showSnackbar('Image copied to clipboard', 'success');
         setCopySuccess(true);
         setTimeout(() => setCopySuccess(false), 2000);
+        return;
+      }
+      
+      // For mobile devices, we'll use a different approach
+      // On mobile, we'll show a message instructing users to long-press the image
+      if (isMobile) {
+        showSnackbar('Long-press on the image and select "Copy" or "Save Image"', 'info');
         return;
       }
       
@@ -108,19 +130,67 @@ const DuaImageGenerator = ({ dua, onSuccess, onError, onClose }) => {
       ctx.drawImage(img, 0, 0);
       
       canvas.toBlob((blob) => {
-        const item = new ClipboardItem({ 'image/png': blob });
-        navigator.clipboard.write([item]);
-        setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 2000);
+        try {
+          const item = new ClipboardItem({ 'image/png': blob });
+          navigator.clipboard.write([item]);
+          showSnackbar('Image copied to clipboard', 'success');
+          setCopySuccess(true);
+          setTimeout(() => setCopySuccess(false), 2000);
+        } catch (err) {
+          showSnackbar('Failed to copy image. Try long-pressing the image instead.', 'error');
+          console.error('Failed to copy image with fallback:', err);
+        }
       });
     } catch (err) {
-      console.error('Failed to copy image: ', err);
+      showSnackbar('Failed to copy image. Try long-pressing the image instead.', 'error');
+      console.error('Failed to copy image:', err);
+    }
+  };
+  
+  const handleShareImage = async () => {
+    if (!imageUrl) return;
+    
+    try {
+      // Use Web Share API if available
+      if (isWebShareSupported) {
+        // Convert base64 to blob for sharing
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const file = new File([blob], 'taqdeer-dua.png', { type: 'image/png' });
+        
+        await navigator.share({
+          title: dua.title || 'Du\'a from Taqdeer',
+          text: 'Check out this du\'a from Taqdeer',
+          files: [file]
+        });
+        
+        showSnackbar('Shared successfully', 'success');
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        showSnackbar('Sharing not supported on this browser. Try copying the image instead.', 'info');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      if (error.name !== 'AbortError') {
+        // AbortError occurs when user cancels the share dialog, which is not an error
+        showSnackbar('Failed to share. Try downloading the image instead.', 'error');
+      }
     }
   };
 
   const handleCloseDialog = () => {
     setDialogOpen(false);
     if (onClose) onClose();
+  };
+  
+  const showSnackbar = (message, severity) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+  
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   // This component renders a hidden version of the du'a optimized for image capture
@@ -331,25 +401,33 @@ const DuaImageGenerator = ({ dua, onSuccess, onError, onClose }) => {
               </Typography>
             </Box>
           ) : (
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'center',
-              p: 1,
-              backgroundColor: '#0a0a0a',
-              borderRadius: 1,
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-            }}>
-              <img 
-                ref={imageRef}
-                src={imageUrl} 
-                alt="Generated Du'a" 
-                style={{ 
-                  maxWidth: '100%', 
-                  height: 'auto',
-                  borderRadius: 4,
-                }} 
-              />
-            </Box>
+            <>
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'center',
+                p: 1,
+                backgroundColor: '#0a0a0a',
+                borderRadius: 1,
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+              }}>
+                <img 
+                  ref={imageRef}
+                  src={imageUrl} 
+                  alt="Generated Du'a" 
+                  style={{ 
+                    maxWidth: '100%', 
+                    height: 'auto',
+                    borderRadius: 4,
+                  }} 
+                />
+              </Box>
+              
+              {isMobile && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 2 }}>
+                  Tip: Long-press on the image to copy or save it
+                </Typography>
+              )}
+            </>
           )}
         </DialogContent>
         
@@ -359,25 +437,47 @@ const DuaImageGenerator = ({ dua, onSuccess, onError, onClose }) => {
           borderTop: '1px solid rgba(255, 255, 255, 0.1)',
         }}>
           <Stack direction="row" spacing={2}>
-            <Button 
-              variant="outlined" 
-              startIcon={<ContentCopyIcon />}
-              onClick={handleCopyImage}
-              disabled={generating || !imageUrl}
-              sx={{ 
-                borderColor: 'rgba(255, 255, 255, 0.5)',
-                color: 'white',
-                '&:hover': {
-                  borderColor: 'white',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                },
-                '& .MuiSvgIcon-root': {
+            {isMobile && isWebShareSupported ? (
+              <Button 
+                variant="outlined" 
+                startIcon={<ShareIcon />}
+                onClick={handleShareImage}
+                disabled={generating || !imageUrl}
+                sx={{ 
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
                   color: 'white',
-                },
-              }}
-            >
-              {copySuccess ? 'Copied!' : 'Copy'}
-            </Button>
+                  '&:hover': {
+                    borderColor: 'white',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    color: 'white',
+                  },
+                }}
+              >
+                Share
+              </Button>
+            ) : (
+              <Button 
+                variant="outlined" 
+                startIcon={<ContentCopyIcon />}
+                onClick={handleCopyImage}
+                disabled={generating || !imageUrl}
+                sx={{ 
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                  color: 'white',
+                  '&:hover': {
+                    borderColor: 'white',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    color: 'white',
+                  },
+                }}
+              >
+                {copySuccess ? 'Copied!' : 'Copy'}
+              </Button>
+            )}
             <Button 
               variant="contained" 
               color="primary"
@@ -390,6 +490,22 @@ const DuaImageGenerator = ({ dua, onSuccess, onError, onClose }) => {
           </Stack>
         </DialogActions>
       </Dialog>
+      
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbarSeverity} 
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
