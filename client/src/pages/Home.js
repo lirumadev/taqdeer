@@ -61,6 +61,7 @@ const Home = () => {
     rawDuasGenerated: 0,
     rawDuasShared: 0
   });
+  const [apiError, setApiError] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const duaCardRef = useRef(null);
@@ -110,45 +111,39 @@ const Home = () => {
     );
   };
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    
+    if (!query.trim()) {
+      setSnackbarMessage('Please enter a question');
+      setSnackbarSeverity('warning');
+      setSnackbarOpen(true);
+      return;
+    }
+    
     setLoading(true);
-    setError('');
+    setDua(null);
+    setError(null);
+    setApiError(false);
     
     try {
+      // Track visitor (don't wait for response)
+      api.post('/api/stats/visitor').catch(err => console.error('Error tracking visitor:', err));
+      
+      // Generate du'a
       const response = await api.post('/api/dua/generate', { query });
       setDua(response.data);
-      
-      // Improved scrolling to ensure the title is visible
-      setTimeout(() => {
-        // Try to scroll to the title first, fall back to the result card
-        const titleElement = document.getElementById('dua-result-title');
-        const resultElement = document.getElementById('dua-result');
-        const targetElement = titleElement || resultElement;
-        
-        if (targetElement) {
-          // Get the header height to use as offset
-          const headerHeight = document.querySelector('header') ? 
-            document.querySelector('header').offsetHeight : 80;
-          
-          // Calculate position with offset
-          const elementPosition = targetElement.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - (headerHeight + 20);
-          
-          // Scroll with smooth behavior
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          });
-        }
-      }, 200);
-    } catch (err) {
-      console.error('Error generating dua:', err);
-      setError('Failed to generate du\'a. Please try again.');
-    } finally {
       setLoading(false);
+    } catch (error) {
+      console.error('Error generating du\'a:', error);
+      setLoading(false);
+      
+      // Check if it's a network error
+      if (error.message === 'Network Error') {
+        setApiError(true);
+      } else {
+        setError('Failed to generate du\'a. Please try again.');
+      }
     }
   };
 
@@ -624,7 +619,7 @@ Shared via Taqdeer.app
           }}
         >
           <CardContent sx={{ p: isMobile ? 2 : 3 }}>
-            <form onSubmit={handleSearch}>
+            <form onSubmit={handleSubmit}>
               <TextField
                 fullWidth
                 variant="outlined"
@@ -689,6 +684,54 @@ Shared via Taqdeer.app
               {error}
             </Typography>
           </Box>
+        )}
+
+        {apiError && (
+          <Paper 
+            elevation={0}
+            sx={{ 
+              p: 3, 
+              mt: 3, 
+              borderRadius: 2,
+              backgroundColor: 'rgba(255, 0, 0, 0.05)',
+              border: '1px solid rgba(255, 0, 0, 0.1)'
+            }}
+          >
+            <Typography variant="h6" color="error" gutterBottom>
+              Server Connection Error
+            </Typography>
+            <Typography variant="body1" paragraph>
+              We're unable to connect to our servers at the moment. This could be due to:
+            </Typography>
+            <ul>
+              <li>
+                <Typography variant="body2">
+                  Temporary server maintenance
+                </Typography>
+              </li>
+              <li>
+                <Typography variant="body2">
+                  Network connectivity issues
+                </Typography>
+              </li>
+              <li>
+                <Typography variant="body2">
+                  High server load
+                </Typography>
+              </li>
+            </ul>
+            <Typography variant="body1" sx={{ mt: 2 }}>
+              Please try again in a few minutes. If the problem persists, please contact us.
+            </Typography>
+            <Button 
+              variant="outlined" 
+              color="primary" 
+              sx={{ mt: 2 }}
+              onClick={() => window.location.reload()}
+            >
+              Refresh Page
+            </Button>
+          </Paper>
         )}
 
         {/* Results Section */}

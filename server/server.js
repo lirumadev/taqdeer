@@ -36,11 +36,17 @@ app.use(cors({
     'https://taqdeer.vercel.app',
     'https://taqdeer-app.vercel.app',
     'https://taqdeer.app',
-    'https://taqdeer-git-main-lirumadevs-projects.vercel.app'  // Add your Vercel preview URL if needed
+    'https://www.taqdeer.app',
+    'https://taqdeer-git-main-lirumadevs-projects.vercel.app'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// For preflight requests
+app.options('*', cors());
+
 app.use(express.json());
 
 // Import models
