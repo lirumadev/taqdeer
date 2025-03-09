@@ -263,7 +263,7 @@ const About = () => {
           </Typography>
           
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary', maxWidth: '700px', mx: 'auto' }}>
-            Taqdeer was developed by a solo Muslim developer who are passion for making authentic Islamic knowledge accessible through technology. The developer believes that modern tools can help Muslims strengthen their connection with Allah through authentic du'as.
+            Taqdeer was created by a solo Muslim developer from Malaysia 🇲🇾 with a passion for combining technology with Islamic knowledge.
           </Typography>
           
           <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic', mt: 3 }}>
