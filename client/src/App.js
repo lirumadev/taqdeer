@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { HelmetProvider } from 'react-helmet-async';
@@ -11,6 +11,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import ScrollToTop from './components/ScrollToTop';
 
 // Create a theme with Islamic-inspired colors
 const theme = createTheme({
@@ -128,9 +129,10 @@ const theme = createTheme({
 function App() {
   return (
     <HelmetProvider>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Router>
+      <Router>
+        <ScrollToTop />
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
           <Box 
             sx={{ 
               display: 'flex', 
@@ -151,8 +153,8 @@ function App() {
             </Box>
             <Footer />
           </Box>
-        </Router>
-      </ThemeProvider>
+        </ThemeProvider>
+      </Router>
     </HelmetProvider>
   );
 }
