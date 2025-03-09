@@ -145,40 +145,8 @@ const Home = () => {
         }
       }, 200);
     } catch (err) {
-      console.error('Error generating du\'a:', err);
-      
-      // Enhanced error reporting
-      let errorMessage = 'Failed to generate du\'a. Please try again.';
-      
-      if (err.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error('Error response:', err.response.data);
-        console.error('Status code:', err.response.status);
-        
-        if (err.response.data && err.response.data.error) {
-          errorMessage = `Error: ${err.response.data.error}`;
-        } else if (err.response.status === 429) {
-          errorMessage = 'Too many requests. Please try again later.';
-        } else if (err.response.status === 500) {
-          errorMessage = 'Server error. Our team has been notified.';
-        }
-      } else if (err.request) {
-        // The request was made but no response was received
-        console.error('No response received:', err.request);
-        errorMessage = 'No response from server. Please check your internet connection.';
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error('Request setup error:', err.message);
-        errorMessage = `Error: ${err.message}`;
-      }
-      
-      setError(errorMessage);
-      
-      // Show error in snackbar
-      setSnackbarMessage(errorMessage);
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
+      console.error('Error generating dua:', err);
+      setError('Failed to generate du\'a. Please try again.');
     } finally {
       setLoading(false);
     }
