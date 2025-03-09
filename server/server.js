@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const { Configuration, OpenAIApi } = require('openai');
+const OpenAI = require('openai');
 
 // Load environment variables
 dotenv.config();
@@ -36,10 +37,16 @@ app.use(cors({
     'https://taqdeer.vercel.app',
     'https://taqdeer-app.vercel.app',
     'https://taqdeer.app',
-    'https://taqdeer-git-main-lirumadevs-projects.vercel.app'  // Add your Vercel preview URL if needed
+    'https://www.taqdeer.app',
+    'https://taqdeer-git-main-lirumadevs-projects.vercel.app',
+    // Allow requests from any subdomain of vercel.app
+    /\.vercel\.app$/
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true
+  credentials: true,
+  // Add more detailed CORS configuration
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 86400 // Cache preflight requests for 24 hours
 }));
 app.use(express.json());
 
@@ -134,118 +141,87 @@ app.post('/api/dua/generate', async (req, res) => {
       return res.status(400).json({ error: 'Query is required' });
     }
     
-    const prompt = `
-      Generate a relevant Islamic du'a (supplication) based on the following situation or need:
-      "${query}"
-      
-      Important guidelines:
-      1. Only provide du'as from the Quran or authentic (sahih) hadith collections. If you're unsure about authenticity, choose a well-known du'a with verified sources.
-      
-      2. Format the response as a JSON object with the following structure:
-      {
-        "title": "Descriptive title for this du'a",
-        "narrator": "Name of the narrator (if from hadith)",
-        "context": "Brief context about when/how the Prophet (SAW) said this du'a (if applicable)",
-        "arabic": "Arabic text of the du'a",
-        "transliteration": "English transliteration",
-        "translation": "English translation",
-        "source": "Source with specific reference format (see below)"
-      }
-      
-      3. For the "source" field, follow these EXACT formatting guidelines:
-         - For Quran: "Quran chapter:verse" (e.g., "Quran 2:186")
-         - For Bukhari: "Sahih al-Bukhari hadith_number" (e.g., "Sahih al-Bukhari 1234")
-         - For Muslim: "Sahih Muslim hadith_number" (e.g., "Sahih Muslim 2345")
-         - For Abu Dawood: "Sunan Abu Dawood hadith_number" (e.g., "Sunan Abu Dawood 1234")
-         - For Tirmidhi: "Jami at-Tirmidhi hadith_number" (e.g., "Jami at-Tirmidhi 3456")
-         - For Nasa'i: "Sunan an-Nasa'i hadith_number" (e.g., "Sunan an-Nasa'i 1234")
-         - For Ibn Majah: "Sunan Ibn Majah hadith_number" (e.g., "Sunan Ibn Majah 4321")
-         - Always include the hadith number for hadith sources
-         - Always include the authenticity grade at the end in this format: " | Sahih", " | Hasan", " | Da'if", etc.
-      
-      4. Examples of correctly formatted sources:
-         - "Quran 2:186"
-         - "Sahih al-Bukhari 6307 | Sahih"
-         - "Sunan Abu Dawood 1517 | Hasan"
-         - "Jami at-Tirmidhi 3599 | Sahih"
-      
-      5. Make sure the Arabic text is correct and properly formatted.
-      
-      6. If no specific du'a exists for this situation, provide a general du'a from the Quran or authentic hadith that would be appropriate, and clearly indicate this in the context field.
-      
-      7. Double-check the hadith number and reference before providing it. Incorrect references will mislead users.
-    `;
+    // Check if OpenAI API key is configured
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('OpenAI API key is not configured');
+      return res.status(500).json({ error: 'OpenAI API key is not configured' });
+    }
     
-    // Updated to use chat completions API with gpt-4o-mini model
-    const completion = await openai.createChatCompletion({
-      model: "gpt-4o",
-      messages: [
-        { 
-          role: "system", 
-          content: "You are a knowledgeable Islamic scholar who provides authentic Islamic du'as (supplications) from the Quran and sahih hadith (preferrably from Quran.com for Quran and Sunnah.com for hadith). You format your responses in clean JSON format and ensure Arabic text is accurate." 
-        },
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.7,
+    // Initialize OpenAI client
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
     });
     
-    // Parse the response as JSON
-    const responseText = completion.data.choices[0].message.content.trim();
-    let duaData;
+    // Log the query for debugging
+    console.log('Generating du\'a for query:', query);
     
+    // Generate du'a using OpenAI
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: `You are an Islamic scholar specializing in du'as (supplications) from the Quran and authentic Hadith.
+          When given a situation, emotion, or request, provide an authentic du'a that would be appropriate.
+          Format your response as a JSON object with the following fields:
+          - title: A concise title for the du'a
+          - arabic: The du'a in Arabic script
+          - transliteration: The transliteration of the Arabic
+          - translation: The English translation
+          - source: Where this du'a is from (Quran chapter/verse or Hadith collection)
+          - narrator: Who narrated this Hadith (if applicable)
+          - context: A brief explanation of when/why this du'a is recited (optional)
+          
+          Only include du'as that are authentically reported in Islamic sources. If you cannot find an authentic du'a for the specific request, provide the closest appropriate authentic du'a and explain why you chose it.`
+        },
+        {
+          role: "user",
+          content: query
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 1000,
+      response_format: { type: "json_object" }
+    });
+    
+    // Parse the response
     try {
-      // Handle markdown-formatted JSON by removing markdown code blocks if present
-      let jsonText = responseText;
+      const duaData = JSON.parse(completion.choices[0].message.content);
       
-      // Check if the response is wrapped in markdown code blocks
-      if (jsonText.startsWith('```json') || jsonText.startsWith('```')) {
-        // Remove the opening markdown
-        jsonText = jsonText.replace(/^```json\s*|^```\s*/g, '');
-        // Remove the closing markdown
-        jsonText = jsonText.replace(/\s*```\s*$/g, '');
+      // Validate the response has the required fields
+      if (!duaData.title || !duaData.arabic || !duaData.translation) {
+        console.error('Invalid response format from OpenAI:', duaData);
+        return res.status(500).json({ error: 'Invalid response format from AI service' });
       }
       
-      duaData = JSON.parse(jsonText);
-      
-      // Ensure all expected fields exist
-      duaData = {
-        title: duaData.title || `Du'a for ${query}`,
-        narrator: duaData.narrator || null,
-        context: duaData.context || null,
-        arabic: duaData.arabic || "",
-        transliteration: duaData.transliteration || "",
-        translation: duaData.translation || "",
-        source: duaData.source || "Source not specified"
-      };
-      
-    } catch (error) {
-      console.error('Error parsing JSON response:', error);
-      console.error('Raw response:', responseText);
-      // If JSON parsing fails, create a structured response
-      duaData = {
-        title: `Du'a for ${query}`,
-        narrator: "Abu Hurairah (RA)",
-        context: null,
-        arabic: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
-        transliteration: "Rabbana atina fid-dunya hasanatan wa fil-akhirati hasanatan waqina 'adhaban-nar",
-        translation: "Our Lord, give us in this world [that which is] good and in the Hereafter [that which is] good and protect us from the punishment of the Fire.",
-        source: "Quran 2:201"
-      };
-    }
-    
-    // Increment the dua generation count - only if database is connected
-    if (mongoose.connection.readyState === 1) {
-      try {
-        await Stats.incrementDuasGenerated();
-      } catch (error) {
-        console.error('Error incrementing dua count:', error);
-        // Continue even if tracking fails
+      // Increment the dua generation count
+      if (mongoose.connection.readyState === 1) {
+        try {
+          await Stats.incrementDuasGenerated();
+        } catch (error) {
+          console.error('Error incrementing dua count:', error);
+          // Continue even if tracking fails
+        }
       }
+      
+      res.json(duaData);
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError);
+      console.error('Raw response:', completion.choices[0].message.content);
+      return res.status(500).json({ error: 'Failed to parse AI response', details: parseError.message });
     }
-    
-    res.json(duaData);
   } catch (error) {
     console.error('Error generating du\'a:', error);
+    
+    // Provide more specific error messages based on the error type
+    if (error.name === 'APIError') {
+      if (error.status === 429) {
+        return res.status(429).json({ error: 'Rate limit exceeded. Please try again later.' });
+      } else if (error.status === 401) {
+        return res.status(500).json({ error: 'Authentication error with AI service' });
+      }
+    }
+    
     res.status(500).json({ error: 'Failed to generate du\'a', details: error.message });
   }
 });
