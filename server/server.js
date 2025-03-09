@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const { Configuration, OpenAIApi } = require('openai');
 const OpenAI = require('openai');
+const http = require('http');
 
 // Load environment variables
 dotenv.config();
@@ -68,6 +69,17 @@ app.get('/', (req, res) => {
       feedback: '/api/feedback'
     }
   });
+});
+
+// Health check endpoint for Railway
+app.get('/health', (req, res) => {
+  const healthcheck = {
+    uptime: process.uptime(),
+    message: 'OK',
+    timestamp: Date.now(),
+    mongoConnection: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  };
+  res.status(200).json(healthcheck);
 });
 
 app.get('/api', (req, res) => {
@@ -298,6 +310,41 @@ app.post('/api/feedback', async (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Keep the server alive by pinging the health endpoint every 5 minutes
+const keepAliveInterval = 5 * 60 * 1000; // 5 minutes
+setInterval(() => {
+  console.log('Performing keep-alive ping...');
+  try {
+    // Make a request to the health endpoint to keep the server active
+    http.get(`http://localhost:${PORT}/health`, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        console.log('Keep-alive ping successful');
+      });
+    }).on('error', (err) => {
+      console.error('Keep-alive ping failed:', err);
+    });
+  } catch (error) {
+    console.error('Error during keep-alive ping:', error);
+  }
+}, keepAliveInterval);
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    // Close database connection
+    mongoose.connection.close(false, () => {
+      console.log('MongoDB connection closed');
+      process.exit(0);
+    });
+  });
 }); 
