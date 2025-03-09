@@ -14,7 +14,7 @@ import {
   useMediaQuery
 } from '@mui/material';
 import EmailIcon from '@mui/icons-material/Email';
-import axios from 'axios';
+import api from '../api'; // Import the API client instead of axios
 import SEO from '../components/SEO';
 
 const Contact = () => {
@@ -57,8 +57,8 @@ const Contact = () => {
     setLoading(true);
     
     try {
-      // Send the form data to the server
-      const response = await axios.post('/api/contact', formData);
+      // Send the form data to the server using our API client
+      const response = await api.post('/api/contact', formData);
       
       setSnackbar({
         open: true,

@@ -26,7 +26,6 @@ import PersonIcon from '@mui/icons-material/Person';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import LaunchIcon from '@mui/icons-material/Launch';
 import FlagIcon from '@mui/icons-material/Flag';
-import axios from 'axios';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -38,6 +37,7 @@ import Alert from '@mui/material/Alert';
 import html2canvas from 'html2canvas';
 import FeedbackDialog from '../components/FeedbackDialog';
 import SEO from '../components/SEO';
+import api from '../api'; // Import the API client instead of axios
 
 // Lazy load the DuaImageGenerator component
 const DuaImageGenerator = lazy(() => import('../components/DuaImageGenerator'));
@@ -71,12 +71,12 @@ const Home = () => {
       try {
         // Only track if this is a new session
         if (!sessionStorage.getItem('visited')) {
-          await axios.post('/api/stats/visitor');
+          await api.post('/api/stats/visitor');
           sessionStorage.setItem('visited', 'true');
         }
         
         // Fetch current stats
-        const response = await axios.get('/api/stats');
+        const response = await api.get('/api/stats');
         if (response.data) {
           setStats({
             uniqueVisitors: formatNumber(response.data.uniqueVisitors),
@@ -118,7 +118,7 @@ const Home = () => {
     setError('');
     
     try {
-      const response = await axios.post('/api/dua/generate', { query });
+      const response = await api.post('/api/dua/generate', { query });
       setDua(response.data);
       
       // Improved scrolling to ensure the title is visible
@@ -180,7 +180,7 @@ const Home = () => {
     
     // Track the share event
     try {
-      axios.post('/api/stats/shared');
+      api.post('/api/stats/shared');
     } catch (error) {
       console.error('Error tracking share:', error);
       // Continue even if tracking fails
@@ -394,7 +394,7 @@ Shared via Taqdeer.app
   const handleSubmitFeedback = async (feedbackData) => {
     try {
       // Send feedback to the server
-      await axios.post('/api/feedback', feedbackData);
+      await api.post('/api/feedback', feedbackData);
       return Promise.resolve();
     } catch (error) {
       console.error('Error submitting feedback:', error);

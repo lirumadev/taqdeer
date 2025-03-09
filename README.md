@@ -18,7 +18,7 @@ Taqdeer is an application that provides authentic Islamic du'as (supplications) 
 - Database: MongoDB
 - AI: OpenAI API
 
-## Setup Instructions
+## Local Development Setup
 
 ### Prerequisites
 - Node.js
@@ -54,7 +54,7 @@ Taqdeer is an application that provides authentic Islamic du'as (supplications) 
    EMAIL_PORT=587
    EMAIL_SECURE=false
    EMAIL_USER=your_email@gmail.com
-   EMAIL_PASS=your_email_password
+   EMAIL_PASS=your_app_password
    EMAIL_FROM=your_email@gmail.com
    ```
 
@@ -69,10 +69,47 @@ Taqdeer is an application that provides authentic Islamic du'as (supplications) 
    npm start
    ```
 
+## Deployment
+
+### MongoDB Atlas
+
+1. Create a MongoDB Atlas account and cluster
+2. Set up database access with a username and password
+3. Configure network access to allow connections from anywhere
+4. Get your connection string
+
+### Railway (Backend)
+
+1. Sign up/log in to Railway with GitHub
+2. Create a new project from your GitHub repository
+3. Configure the deployment:
+   - Set the root directory to `/server`
+   - Set the start command to `npm start`
+4. Add environment variables:
+   - MONGODB_URI
+   - OPENAI_API_KEY
+   - EMAIL_HOST
+   - EMAIL_PORT
+   - EMAIL_SECURE
+   - EMAIL_USER
+   - EMAIL_PASS
+   - EMAIL_FROM
+
+### Vercel (Frontend)
+
+1. Sign up/log in to Vercel with GitHub
+2. Create a new project from your GitHub repository
+3. Configure the project:
+   - Set the root directory to `/client`
+   - Framework preset: Create React App
+4. Add environment variables:
+   - REACT_APP_API_URL (your Railway backend URL)
+5. Deploy
+
 ## License
 
-[Your chosen license]
+[MIT License](LICENSE)
 
 ## Contact
 
-[Your contact information]
+For questions or feedback, please open an issue on GitHub or contact the developer.

@@ -9,12 +9,15 @@ import {
   DialogContent, 
   DialogActions,
   IconButton,
-  Stack
+  Stack,
+  Paper
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DownloadIcon from '@mui/icons-material/Download';
+import ShareIcon from '@mui/icons-material/Share';
 import html2canvas from 'html2canvas';
+import api from '../api'; // Import the API client if needed
 
 /**
  * Component for generating shareable images from du'a content

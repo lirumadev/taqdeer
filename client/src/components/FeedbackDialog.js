@@ -17,11 +17,15 @@ import {
   CircularProgress
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import api from '../api'; // Import the API client if needed
 
 /**
  * Dialog component for collecting user feedback about errors in du'a results
  */
 const FeedbackDialog = ({ open, onClose, onSubmit, dua }) => {
+  // No direct API calls in this component, it uses the onSubmit prop
+  // which we've already updated in the Home component
+  
   const [feedbackType, setFeedbackType] = useState('incorrect_translation');
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
