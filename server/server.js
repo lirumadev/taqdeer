@@ -44,6 +44,21 @@ const Feedback = require('./models/Feedback');
 const Stats = require('./models/Stats');
 
 // Routes
+// Add root route handler
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Welcome to Taqdeer API', 
+    version: '1.0.0',
+    endpoints: {
+      api: '/api',
+      stats: '/api/stats',
+      generateDua: '/api/dua/generate',
+      contact: '/api/contact',
+      feedback: '/api/feedback'
+    }
+  });
+});
+
 app.get('/api', (req, res) => {
   res.json({ message: 'Taqdeer API is working!' });
 });
