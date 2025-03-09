@@ -134,6 +134,23 @@ const Home = () => {
       const response = await api.post('/api/dua/generate', { query });
       setDua(response.data);
       setLoading(false);
+      
+      // Scroll to the result after a short delay to ensure the component has rendered
+      setTimeout(() => {
+        if (duaCardRef.current) {
+          // Get the position of the element relative to the viewport
+          const rect = duaCardRef.current.getBoundingClientRect();
+          
+          // Calculate the scroll position with offset (adding padding at the top)
+          const scrollTop = window.pageYOffset + rect.top - 80; // 80px padding from the top
+          
+          // Scroll to the calculated position
+          window.scrollTo({
+            top: scrollTop,
+            behavior: 'smooth'
+          });
+        }
+      }, 200); // Increased delay to ensure rendering is complete
     } catch (error) {
       console.error('Error generating du\'a:', error);
       setLoading(false);
