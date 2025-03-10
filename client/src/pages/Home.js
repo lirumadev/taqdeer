@@ -426,7 +426,7 @@ Shared via Taqdeer.app
       <SEO 
         title="Taqdeer - AI-Powered Islamic Du'a Generator"
         description="Find authentic du'as from Quran and Hadith for any situation. Taqdeer uses AI to provide personalized Islamic supplications with references and translations."
-        canonicalUrl="/"
+        canonicalUrl="https://taqdeer.app/"
         keywords="islamic dua, dua generator, islamic supplications, quran dua, hadith dua, muslim prayers, authentic duas, islamic app"
       >
         <script type="application/ld+json">
@@ -447,6 +447,19 @@ Shared via Taqdeer.app
               "@type": "AggregateRating",
               "ratingValue": "4.8",
               "ratingCount": "120"
+            },
+            "author": {
+              "@type": "Person",
+              "name": "Muslim Developer from Malaysia",
+              "url": "https://taqdeer.app/about"
+            },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://taqdeer.app/?query={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
             }
           })}
         </script>

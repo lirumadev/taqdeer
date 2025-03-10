@@ -14,7 +14,8 @@ import {
   List,
   ListItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  Link
 } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
@@ -64,26 +65,56 @@ const About = () => {
       }}
     >
       <SEO 
-        title="About Taqdeer - Our Mission and Values"
-        description="Learn about Taqdeer's mission to provide authentic Islamic du'as from Quran and Hadith. Discover our commitment to accuracy, authenticity, and accessibility."
-        canonicalUrl="/about"
-        keywords="about taqdeer, islamic dua app, authentic hadith, quran supplications, islamic technology"
+        title="About Taqdeer - Islamic Du'a Generator"
+        description="Learn about Taqdeer, an AI-powered Islamic du'a generator that provides authentic supplications from Quran and Hadith."
+        canonicalUrl="https://taqdeer.app/about"
       >
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "AboutPage",
-            "name": "About Taqdeer",
-            "description": "Learn about Taqdeer's mission to provide authentic Islamic du'as from Quran and Hadith",
-            "mainEntity": {
-              "@type": "Organization",
-              "name": "Taqdeer",
-              "description": "AI-Powered Islamic Du'a Generator providing authentic supplications from Quran and Hadith",
-              "url": "https://taqdeer.app",
-              "sameAs": [
-                "https://github.com/taqdeer-app"
-              ]
-            }
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What is Taqdeer?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Taqdeer is an AI-powered Islamic du'a generator that helps Muslims find authentic supplications from the Quran and Hadith based on their specific situations, needs, or feelings."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Are the du'as provided by Taqdeer authentic?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes, all du'as provided by Taqdeer are sourced from authentic Islamic texts including the Quran and verified Hadith collections. Each du'a includes its source reference."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does Taqdeer work?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Taqdeer uses advanced AI technology to understand your query and match it with relevant du'as from authentic Islamic sources. It provides the Arabic text, transliteration, translation, and source reference for each du'a."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is Taqdeer free to use?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes, Taqdeer is completely free to use. It was created as a service to the Muslim community to make authentic du'as more accessible."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Who created Taqdeer?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Taqdeer was created by a solo Muslim developer from Malaysia 🇲🇾 with a passion for combining technology with Islamic knowledge."
+                }
+              }
+            ]
           })}
         </script>
       </SEO>
