@@ -183,11 +183,7 @@ const Home = () => {
     
     if (!dua) return;
     
-    setSnackbarMessage('Generating image...');
-    setSnackbarSeverity('info');
-    setSnackbarOpen(true);
-    
-    // Show the image generator component
+    // Show the image generator component without the redundant snackbar
     setShowImageGenerator(true);
     
     // Track the share event

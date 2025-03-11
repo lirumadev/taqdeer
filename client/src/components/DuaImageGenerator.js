@@ -384,7 +384,9 @@ const DuaImageGenerator = ({ dua, onSuccess, onError, onClose }) => {
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           pb: 1
         }}>
-          <Typography variant="h6" color="primary">Share Du'a</Typography>
+          <Typography variant="h6" color="primary">
+            {generating ? 'Generating Image...' : 'Share Du\'a'}
+          </Typography>
           <IconButton onClick={handleCloseDialog} size="small" sx={{ color: 'white' }}>
             <CloseIcon />
           </IconButton>
@@ -397,11 +399,13 @@ const DuaImageGenerator = ({ dua, onSuccess, onError, onClose }) => {
               flexDirection: 'column',
               alignItems: 'center', 
               justifyContent: 'center', 
-              p: 4 
+              p: 4,
+              minHeight: '300px', // Add minimum height to prevent layout shift
+              width: '100%'
             }}>
-              <CircularProgress size={40} />
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                Generating image...
+              <CircularProgress size={48} color="primary" />
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
+                Creating your shareable image...
               </Typography>
             </Box>
           ) : (
@@ -441,56 +445,68 @@ const DuaImageGenerator = ({ dua, onSuccess, onError, onClose }) => {
           borderTop: '1px solid rgba(255, 255, 255, 0.1)',
         }}>
           <Stack direction="row" spacing={2}>
-            {isMobile && isWebShareSupported ? (
+            {!generating && (
+              <>
+                {isMobile && isWebShareSupported ? (
+                  <Button 
+                    variant="outlined" 
+                    startIcon={<ShareIcon />}
+                    onClick={handleShareImage}
+                    disabled={generating || !imageUrl}
+                    sx={{ 
+                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                      color: 'white',
+                      '&:hover': {
+                        borderColor: 'white',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      },
+                      '& .MuiSvgIcon-root': {
+                        color: 'white',
+                      },
+                    }}
+                  >
+                    Share
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="outlined" 
+                    startIcon={<ContentCopyIcon />}
+                    onClick={handleCopyImage}
+                    disabled={generating || !imageUrl}
+                    sx={{ 
+                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                      color: 'white',
+                      '&:hover': {
+                        borderColor: 'white',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      },
+                      '& .MuiSvgIcon-root': {
+                        color: 'white',
+                      },
+                    }}
+                  >
+                    {copySuccess ? 'Copied!' : 'Copy'}
+                  </Button>
+                )}
+                <Button 
+                  variant="contained" 
+                  color="primary"
+                  startIcon={<DownloadIcon />}
+                  onClick={handleSaveImage}
+                  disabled={generating || !imageUrl}
+                >
+                  Save
+                </Button>
+              </>
+            )}
+            {generating && (
               <Button 
-                variant="outlined" 
-                startIcon={<ShareIcon />}
-                onClick={handleShareImage}
-                disabled={generating || !imageUrl}
-                sx={{ 
-                  borderColor: 'rgba(255, 255, 255, 0.5)',
-                  color: 'white',
-                  '&:hover': {
-                    borderColor: 'white',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  },
-                  '& .MuiSvgIcon-root': {
-                    color: 'white',
-                  },
-                }}
+                variant="outlined"
+                onClick={handleCloseDialog}
               >
-                Share
-              </Button>
-            ) : (
-              <Button 
-                variant="outlined" 
-                startIcon={<ContentCopyIcon />}
-                onClick={handleCopyImage}
-                disabled={generating || !imageUrl}
-                sx={{ 
-                  borderColor: 'rgba(255, 255, 255, 0.5)',
-                  color: 'white',
-                  '&:hover': {
-                    borderColor: 'white',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  },
-                  '& .MuiSvgIcon-root': {
-                    color: 'white',
-                  },
-                }}
-              >
-                {copySuccess ? 'Copied!' : 'Copy'}
+                Cancel
               </Button>
             )}
-            <Button 
-              variant="contained" 
-              color="primary"
-              startIcon={<DownloadIcon />}
-              onClick={handleSaveImage}
-              disabled={generating || !imageUrl}
-            >
-              Save
-            </Button>
           </Stack>
         </DialogActions>
       </Dialog>
