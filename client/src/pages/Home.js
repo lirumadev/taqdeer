@@ -38,6 +38,9 @@ import html2canvas from 'html2canvas';
 import FeedbackDialog from '../components/FeedbackDialog';
 import SEO from '../components/SEO';
 import api from '../api'; // Import the API client instead of axios
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import PrayingHandsIcon from '@mui/icons-material/PanTool'; // Using PanTool as praying hands
 
 // Lazy load the DuaImageGenerator component
 const DuaImageGenerator = lazy(() => import('../components/DuaImageGenerator'));
@@ -45,6 +48,7 @@ const DuaImageGenerator = lazy(() => import('../components/DuaImageGenerator'));
 const Home = () => {
   const [query, setQuery] = useState('');
   const [dua, setDua] = useState(null);
+  const [ruling, setRuling] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [shareAnchorEl, setShareAnchorEl] = useState(null);
@@ -62,6 +66,7 @@ const Home = () => {
     rawDuasShared: 0
   });
   const [apiError, setApiError] = useState(false);
+  const [searchMode, setSearchMode] = useState('ruling'); // Changed default to 'ruling'
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const duaCardRef = useRef(null);
@@ -111,6 +116,16 @@ const Home = () => {
     );
   };
 
+  const handleSearchModeChange = (event, newMode) => {
+    if (newMode !== null) {
+      setSearchMode(newMode);
+      setDua(null);
+      setRuling(null);
+      setError(null);
+      setQuery(''); // Clear the input field when switching modes
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     
@@ -123,6 +138,7 @@ const Home = () => {
     
     setLoading(true);
     setDua(null);
+    setRuling(null);
     setError(null);
     setApiError(false);
     
@@ -130,36 +146,38 @@ const Home = () => {
       // Track visitor (don't wait for response)
       api.post('/api/stats/visitor').catch(err => console.error('Error tracking visitor:', err));
       
-      // Generate du'a
-      const response = await api.post('/api/dua/generate', { query });
-      setDua(response.data);
+      // Generate response based on search mode
+      const endpoint = searchMode === 'dua' ? '/api/dua/generate' : '/api/ruling/search';
+      const response = await api.post(endpoint, { query });
+      
+      if (searchMode === 'dua') {
+        setDua(response.data);
+      } else {
+        setRuling(response.data);
+      }
       setLoading(false);
       
-      // Scroll to the result after a short delay to ensure the component has rendered
+      // Scroll to the result after a short delay
       setTimeout(() => {
         if (duaCardRef.current) {
-          // Get the position of the element relative to the viewport
           const rect = duaCardRef.current.getBoundingClientRect();
-          
-          // Calculate the scroll position with offset (adding padding at the top)
-          const scrollTop = window.pageYOffset + rect.top - 80; // 80px padding from the top
-          
-          // Scroll to the calculated position
+          const scrollTop = window.pageYOffset + rect.top - 80;
           window.scrollTo({
             top: scrollTop,
             behavior: 'smooth'
           });
         }
-      }, 200); // Increased delay to ensure rendering is complete
+      }, 200);
     } catch (error) {
-      console.error('Error generating du\'a:', error);
+      console.error('Error generating response:', error);
       setLoading(false);
       
-      // Check if it's a network error
-      if (error.message === 'Network Error') {
+      if (error.isTimeout) {
+        setError('Request took longer than expected. Please try again.');
+      } else if (error.message === 'Network Error') {
         setApiError(true);
       } else {
-        setError('Failed to generate du\'a. Please try again.');
+        setError(error.message || 'Failed to generate response. Please try again.');
       }
     }
   };
@@ -282,13 +300,14 @@ Shared via Taqdeer.app
   const generateReferenceLink = (source) => {
     if (!source) return null;
     
-    // Check if it's a Quran reference
-    const quranMatch = source.match(/Quran\s+(\d+):(\d+)/i);
+    // Check if it's a Quran reference - updated regex to be more flexible
+    const quranMatch = source.match(/(?:Quran|Qur'an|القرآن)\s*(\d+):(\d+)/i);
     if (quranMatch) {
       const [_, surah, ayah] = quranMatch;
       return {
         url: `https://quran.com/${surah}/${ayah}`,
-        label: 'View on Quran.com'
+        label: 'View on Quran.com',
+        isQuran: true
       };
     }
     
@@ -298,7 +317,8 @@ Shared via Taqdeer.app
       const [_, hadithNumber] = bukhariMatch;
       return {
         url: `https://sunnah.com/bukhari:${hadithNumber}`,
-        label: 'View on Sunnah.com'
+        label: 'View on Sunnah.com',
+        isQuran: false
       };
     }
     
@@ -308,7 +328,8 @@ Shared via Taqdeer.app
       const [_, hadithNumber] = muslimMatch;
       return {
         url: `https://sunnah.com/muslim:${hadithNumber}`,
-        label: 'View on Sunnah.com'
+        label: 'View on Sunnah.com',
+        isQuran: false
       };
     }
     
@@ -318,7 +339,8 @@ Shared via Taqdeer.app
       const hadithNumber = abuDawoodMatch[2];
       return {
         url: `https://sunnah.com/abudawud:${hadithNumber}`,
-        label: 'View on Sunnah.com'
+        label: 'View on Sunnah.com',
+        isQuran: false
       };
     }
     
@@ -328,7 +350,8 @@ Shared via Taqdeer.app
       const [_, hadithNumber] = tirmidhiMatch;
       return {
         url: `https://sunnah.com/tirmidhi:${hadithNumber}`,
-        label: 'View on Sunnah.com'
+        label: 'View on Sunnah.com',
+        isQuran: false
       };
     }
     
@@ -338,7 +361,8 @@ Shared via Taqdeer.app
       const [_, hadithNumber] = nasaiMatch;
       return {
         url: `https://sunnah.com/nasai:${hadithNumber}`,
-        label: 'View on Sunnah.com'
+        label: 'View on Sunnah.com',
+        isQuran: false
       };
     }
     
@@ -348,7 +372,8 @@ Shared via Taqdeer.app
       const [_, hadithNumber] = ibnMajahMatch;
       return {
         url: `https://sunnah.com/ibnmajah:${hadithNumber}`,
-        label: 'View on Sunnah.com'
+        label: 'View on Sunnah.com',
+        isQuran: false
       };
     }
     
@@ -358,7 +383,8 @@ Shared via Taqdeer.app
       const [_, hadithNumber] = malikMatch;
       return {
         url: `https://sunnah.com/malik:${hadithNumber}`,
-        label: 'View on Sunnah.com'
+        label: 'View on Sunnah.com',
+        isQuran: false
       };
     }
     
@@ -368,7 +394,8 @@ Shared via Taqdeer.app
       const [_, hadithNumber] = riyadMatch;
       return {
         url: `https://sunnah.com/riyadussalihin:${hadithNumber}`,
-        label: 'View on Sunnah.com'
+        label: 'View on Sunnah.com',
+        isQuran: false
       };
     }
     
@@ -379,7 +406,8 @@ Shared via Taqdeer.app
       const searchQuery = encodeURIComponent(source.replace(/\|.*$/, '').trim());
       return {
         url: `https://sunnah.com/search?q=${searchQuery}`,
-        label: 'Search on Sunnah.com'
+        label: 'Search on Sunnah.com',
+        isQuran: false
       };
     }
     
@@ -420,8 +448,8 @@ Shared via Taqdeer.app
       }}
     >
       <SEO 
-        title="Taqdeer - AI-Powered Islamic Du'a Generator"
-        description="Find authentic du'as from Quran and Hadith for any situation. Taqdeer uses AI to provide personalized Islamic supplications with references and translations."
+        title="Taqdeer - Authentic Islamic Rulings & Du'a Guide"
+        description="Find authentic Islamic rulings and du'as from Quran and Hadith. Get verified answers about Islamic practices and supplications with scholarly references."
         canonicalUrl="https://taqdeer.app/"
         keywords="islamic dua, dua generator, islamic supplications, quran dua, hadith dua, muslim prayers, authentic duas, islamic app"
       >
@@ -493,7 +521,7 @@ Shared via Taqdeer.app
             gutterBottom
             sx={{ mb: 2 }}
           >
-            AI-Powered Personalized Du'a Generator
+            Your Trusted Guide to Islamic Rulings & Knowledge
           </Typography>
           <Typography 
             variant="body1" 
@@ -504,9 +532,112 @@ Shared via Taqdeer.app
               color: 'text.secondary'
             }}
           >
-            Describe your situation, feelings, or needs, and receive relevant du'as from the Quran and authentic Hadith.
+            Discover authentic answers about Islamic practices from verified Quran and Hadith sources, with clear explanations and scholarly guidance.
           </Typography>
           
+          {/* Search Mode Toggle - Reordered */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+            <ToggleButtonGroup
+              value={searchMode}
+              exclusive
+              onChange={handleSearchModeChange}
+              aria-label="search mode"
+              sx={{
+                backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                '& .MuiToggleButton-root': {
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  '&.Mui-selected': {
+                    color: '#8E5A2D',
+                    backgroundColor: 'rgba(142, 90, 45, 0.1)',
+                  },
+                },
+              }}
+            >
+              <ToggleButton value="ruling" aria-label="ruling search">
+                <MenuBookIcon sx={{ mr: 1 }} />
+                Islamic Rulings
+              </ToggleButton>
+              <ToggleButton value="dua" aria-label="dua search">
+                <PrayingHandsIcon sx={{ mr: 1 }} />
+                Du'a Search
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          {/* Example Questions */}
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              justifyContent: 'center', 
+              gap: 1,
+              mt: 3,
+              mb: 2
+            }}
+          >
+            {searchMode === 'ruling' ? (
+              <>
+                <Chip 
+                  label="Is music allowed in Islam?" 
+                  size="small" 
+                  onClick={() => setQuery("Is music allowed in Islam?")}
+                  sx={{ 
+                    backgroundColor: 'rgba(142, 90, 45, 0.1)',
+                    '&:hover': { backgroundColor: 'rgba(142, 90, 45, 0.2)' }
+                  }}
+                />
+                <Chip 
+                  label="How to perform wudu correctly?" 
+                  size="small" 
+                  onClick={() => setQuery("How to perform wudu correctly?")}
+                  sx={{ 
+                    backgroundColor: 'rgba(142, 90, 45, 0.1)',
+                    '&:hover': { backgroundColor: 'rgba(142, 90, 45, 0.2)' }
+                  }}
+                />
+                <Chip 
+                  label="Can I pray while sitting?" 
+                  size="small" 
+                  onClick={() => setQuery("Can I pray while sitting?")}
+                  sx={{ 
+                    backgroundColor: 'rgba(142, 90, 45, 0.1)',
+                    '&:hover': { backgroundColor: 'rgba(142, 90, 45, 0.2)' }
+                  }}
+                />
+              </>
+            ) : (
+              <>
+                <Chip 
+                  label="Du'a for anxiety" 
+                  size="small" 
+                  onClick={() => setQuery("Du'a for anxiety")}
+                  sx={{ 
+                    backgroundColor: 'rgba(142, 90, 45, 0.1)',
+                    '&:hover': { backgroundColor: 'rgba(142, 90, 45, 0.2)' }
+                  }}
+                />
+                <Chip 
+                  label="Du'a before exam" 
+                  size="small" 
+                  onClick={() => setQuery("Du'a before exam")}
+                  sx={{ 
+                    backgroundColor: 'rgba(142, 90, 45, 0.1)',
+                    '&:hover': { backgroundColor: 'rgba(142, 90, 45, 0.2)' }
+                  }}
+                />
+                <Chip 
+                  label="Du'a for parents" 
+                  size="small" 
+                  onClick={() => setQuery("Du'a for parents")}
+                  sx={{ 
+                    backgroundColor: 'rgba(142, 90, 45, 0.1)',
+                    '&:hover': { backgroundColor: 'rgba(142, 90, 45, 0.2)' }
+                  }}
+                />
+              </>
+            )}
+          </Box>
+
           {/* Credibility Indicators - Only show when threshold is reached */}
           {shouldShowStats() && (
             <Box 
@@ -649,7 +780,10 @@ Shared via Taqdeer.app
               <TextField
                 fullWidth
                 variant="outlined"
-                placeholder="e.g., I need strength for an exam, I'm feeling anxious..."
+                placeholder={searchMode === 'dua' 
+                  ? "e.g., I need strength for an exam, I'm feeling anxious..."
+                  : "e.g., Is cutting nails on Monday a sunnah? What is the ruling on..."
+                }
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 sx={{ 
@@ -687,7 +821,7 @@ Shared via Taqdeer.app
                   {loading ? (
                     <CircularProgress size={24} color="inherit" />
                   ) : (
-                    'Find Du\'a'
+                    searchMode === 'dua' ? 'Find Du\'a' : 'Search Ruling'
                   )}
                 </Button>
               </Box>
@@ -761,9 +895,9 @@ Shared via Taqdeer.app
         )}
 
         {/* Results Section */}
-        {dua && (
+        {(dua || ruling) && (
           <Card 
-            id="dua-result"
+            id="result-card"
             ref={duaCardRef}
             elevation={6} 
             sx={{ 
@@ -794,7 +928,7 @@ Shared via Taqdeer.app
                 color="primary"
                 sx={{ fontWeight: 'bold' }}
               >
-                {dua.title || "Du'a for " + query.charAt(0).toUpperCase() + query.slice(1)}
+                {dua ? (dua.title || "Du'a for " + query) : (ruling.title || "Ruling on " + query)}
               </Typography>
               <Box>
                 <Tooltip title="Share">
@@ -826,198 +960,511 @@ Shared via Taqdeer.app
             </Box>
             
             <CardContent sx={{ p: 3 }}>
-              {/* Narrator Information */}
-              {dua.narrator && (
-                <Box 
-                  display="flex" 
-                  alignItems="center" 
-                  mb={2}
-                  sx={{ 
-                    p: 1.5, 
-                    borderRadius: 2, 
-                    backgroundColor: 'rgba(255, 255, 255, 0.03)' 
-                  }}
-                >
-                  <PersonIcon sx={{ mr: 1, color: '#8E5A2D' }} />
-                  <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
-                    Narrated by {dua.narrator}:
-                  </Typography>
-                </Box>
-              )}
-              
-              {/* Context/Introduction */}
-              {dua.context && (
-                <Box 
-                  sx={{ 
-                    position: 'relative',
-                    pl: 4,
-                    pr: 2,
-                    py: 2,
-                    mb: 3,
-                  }}
-                >
-                  <FormatQuoteIcon 
-                    sx={{ 
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      color: 'rgba(142, 90, 45, 0.3)',
-                      fontSize: '2rem'
-                    }} 
-                  />
-                  <Typography 
-                    variant="body2" 
-                    paragraph 
-                    sx={{ 
-                      fontStyle: 'italic',
-                      mb: 0,
-                      color: 'rgba(255,255,255,0.8)'
-                    }}
-                  >
-                    {dua.context}
-                  </Typography>
-                </Box>
-              )}
-              
-              {/* Arabic Text */}
-              {dua.arabic && (
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 3,
-                    mb: 3,
-                    mt: 2,
-                    borderRadius: 2,
-                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                    border: '1px solid rgba(255, 255, 255, 0.05)',
-                  }}
-                >
-                  <Typography 
-                    variant="h5" 
-                    align="right" 
-                    paragraph 
-                    className="arabic-text"
-                    sx={{ 
-                      fontSize: '1.8rem',
-                      mb: 0,
-                      lineHeight: 2,
-                    }}
-                  >
-                    {dua.arabic}
-                  </Typography>
-                </Paper>
-              )}
-              
-              {/* Transliteration */}
-              {dua.transliteration && (
-                <Box mb={3}>
-                  <Typography variant="subtitle2" color="primary" gutterBottom>
-                    Transliteration:
-                  </Typography>
-                  <Typography 
-                    variant="body1" 
-                    paragraph 
-                    sx={{ 
-                      fontStyle: 'italic', 
-                      color: 'rgba(255,255,255,0.9)',
-                      pl: 2,
-                      borderLeft: '2px solid rgba(142, 90, 45, 0.5)',
-                    }}
-                  >
-                    {dua.transliteration}
-                  </Typography>
-                </Box>
-              )}
-              
-              {/* Translation */}
-              {dua.translation && (
-                <Box mb={3}>
-                  <Typography variant="subtitle2" color="primary" gutterBottom>
-                    Translation:
-                  </Typography>
-                  <Typography 
-                    variant="body1" 
-                    paragraph 
-                    sx={{ 
-                      color: 'rgba(255,255,255,0.9)',
-                      pl: 2,
-                      borderLeft: '2px solid rgba(142, 90, 45, 0.5)',
-                    }}
-                  >
-                    {dua.translation}
-                  </Typography>
-                </Box>
-              )}
-              
-              {/* Source with Hadith Grade and Reference Link */}
-              {dua.source && (
-                <Box 
-                  sx={{ 
-                    p: 1.5, 
-                    borderRadius: 2, 
-                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                    mt: 3,
-                  }}
-                >
-                  <Box 
-                    display="flex" 
-                    alignItems="center"
-                    flexWrap="wrap"
-                    sx={{
-                      mb: generateReferenceLink(dua.source) ? 1 : 0,
-                    }}
-                  >
-                    <MenuBookIcon sx={{ mr: 1, color: '#8E5A2D', flexShrink: 0 }} />
-                    <Typography 
-                      variant="body2" 
-                      color="rgba(255,255,255,0.7)"
-                      sx={{ flexGrow: 1 }}
+              {dua ? (
+                <>
+                  {/* Narrator Information */}
+                  {dua.narrator && (
+                    <Box 
+                      display="flex" 
+                      alignItems="center" 
+                      mb={2}
+                      sx={{ 
+                        p: 1.5, 
+                        borderRadius: 2, 
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)' 
+                      }}
                     >
-                      {dua.source}
-                    </Typography>
-                    
-                    {extractHadithGrade(dua.source) && (
-                      <Chip 
-                        label={extractHadithGrade(dua.source)} 
-                        size="small" 
-                        color={getHadithGradeColor(extractHadithGrade(dua.source))}
-                        sx={{ ml: 1, height: 20, fontSize: '0.7rem', flexShrink: 0 }}
-                      />
-                    )}
-                  </Box>
+                      <PersonIcon sx={{ mr: 1, color: '#8E5A2D' }} />
+                      <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                        Narrated by {dua.narrator}:
+                      </Typography>
+                    </Box>
+                  )}
                   
-                  {/* Reference Link and Report Error */}
-                  <Box 
-                    sx={{ 
-                      mt: 1, 
-                      display: 'flex', 
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-                      pt: 1,
-                    }}
-                  >
-                    {generateReferenceLink(dua.source) && (
-                      <Link
-                        href={generateReferenceLink(dua.source).url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          color: theme.palette.primary.light,
-                          textDecoration: 'none',
-                          fontSize: '0.8rem',
-                          '&:hover': {
-                            textDecoration: 'underline',
-                          }
+                  {/* Context/Introduction */}
+                  {dua.context && (
+                    <Box 
+                      sx={{ 
+                        position: 'relative',
+                        pl: 4,
+                        pr: 2,
+                        py: 2,
+                        mb: 3,
+                      }}
+                    >
+                      <FormatQuoteIcon 
+                        sx={{ 
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          color: 'rgba(142, 90, 45, 0.3)',
+                          fontSize: '2rem'
+                        }} 
+                      />
+                      <Typography 
+                        variant="body2" 
+                        paragraph 
+                        sx={{ 
+                          fontStyle: 'italic',
+                          mb: 0,
+                          color: 'rgba(255,255,255,0.8)'
                         }}
                       >
-                        {generateReferenceLink(dua.source).label}
-                        <LaunchIcon sx={{ ml: 0.5, fontSize: '0.9rem' }} />
-                      </Link>
-                    )}
-                    
+                        {dua.context}
+                      </Typography>
+                    </Box>
+                  )}
+                  
+                  {/* Arabic Text */}
+                  {dua.arabic && (
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        p: 3,
+                        mb: 3,
+                        mt: 2,
+                        borderRadius: 2,
+                        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                      }}
+                    >
+                      <Typography 
+                        variant="h5" 
+                        align="right" 
+                        paragraph 
+                        className="arabic-text"
+                        sx={{ 
+                          fontSize: '1.8rem',
+                          mb: 0,
+                          lineHeight: 2,
+                        }}
+                      >
+                        {dua.arabic}
+                      </Typography>
+                    </Paper>
+                  )}
+                  
+                  {/* Transliteration */}
+                  {dua.transliteration && (
+                    <Box mb={3}>
+                      <Typography variant="subtitle2" color="primary" gutterBottom>
+                        Transliteration:
+                      </Typography>
+                      <Typography 
+                        variant="body1" 
+                        paragraph 
+                        sx={{ 
+                          fontStyle: 'italic', 
+                          color: 'rgba(255,255,255,0.9)',
+                          pl: 2,
+                          borderLeft: '2px solid rgba(142, 90, 45, 0.5)',
+                        }}
+                      >
+                        {dua.transliteration}
+                      </Typography>
+                    </Box>
+                  )}
+                  
+                  {/* Translation */}
+                  {dua.translation && (
+                    <Box mb={3}>
+                      <Typography variant="subtitle2" color="primary" gutterBottom>
+                        Translation:
+                      </Typography>
+                      <Typography 
+                        variant="body1" 
+                        paragraph 
+                        sx={{ 
+                          color: 'rgba(255,255,255,0.9)',
+                          pl: 2,
+                          borderLeft: '2px solid rgba(142, 90, 45, 0.5)',
+                        }}
+                      >
+                        {dua.translation}
+                      </Typography>
+                    </Box>
+                  )}
+                  
+                  {/* Source with Hadith Grade and Reference Link */}
+                  {dua.source && (
+                    <Box 
+                      sx={{ 
+                        p: 1.5, 
+                        borderRadius: 2, 
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                        mt: 3,
+                      }}
+                    >
+                      <Box 
+                        display="flex" 
+                        alignItems="center"
+                        flexWrap="wrap"
+                        sx={{
+                          mb: generateReferenceLink(dua.source) ? 1 : 0,
+                        }}
+                      >
+                        <MenuBookIcon 
+                          sx={{ 
+                            mr: 1, 
+                            color: dua.source?.toLowerCase().includes('quran') ? '#4CAF50' : '#8E5A2D', 
+                            flexShrink: 0 
+                          }} 
+                        />
+                        <Typography 
+                          variant="body2" 
+                          color="rgba(255,255,255,0.7)"
+                          sx={{ flexGrow: 1 }}
+                        >
+                          {dua.source}
+                        </Typography>
+                        
+                        {extractHadithGrade(dua.source) && (
+                          <Chip 
+                            label={extractHadithGrade(dua.source)} 
+                            size="small" 
+                            color={getHadithGradeColor(extractHadithGrade(dua.source))}
+                            sx={{ ml: 1, height: 20, fontSize: '0.7rem', flexShrink: 0 }}
+                          />
+                        )}
+                      </Box>
+                      
+                      {/* Reference Link and Report Error */}
+                      <Box 
+                        sx={{ 
+                          mt: 1, 
+                          display: 'flex', 
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                          pt: 1,
+                        }}
+                      >
+                        {generateReferenceLink(dua.source) && (
+                          <Link
+                            href={generateReferenceLink(dua.source).url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              color: dua.source?.toLowerCase().includes('quran') ? '#4CAF50' : theme.palette.primary.light,
+                              textDecoration: 'none',
+                              fontSize: '0.8rem',
+                              '&:hover': {
+                                textDecoration: 'underline',
+                              }
+                            }}
+                          >
+                            {generateReferenceLink(dua.source).label}
+                            <LaunchIcon sx={{ ml: 0.5, fontSize: '0.9rem' }} />
+                          </Link>
+                        )}
+                        
+                        <Link
+                          component="button"
+                          onClick={handleOpenFeedbackDialog}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            color: 'rgba(255, 255, 255, 0.5)',
+                            textDecoration: 'none',
+                            fontSize: '0.75rem',
+                            transition: 'color 0.2s',
+                            '&:hover': {
+                              color: 'rgba(255, 255, 255, 0.8)',
+                            }
+                          }}
+                        >
+                          <FlagIcon sx={{ mr: 0.5, fontSize: '0.9rem' }} />
+                          Report an issue
+                        </Link>
+                      </Box>
+                    </Box>
+                  )}
+                </>
+              ) : ruling && (
+                <>
+                  {/* Main Summary Section */}
+                  <Box 
+                    sx={{ 
+                      mb: 4,
+                      p: 3,
+                      borderRadius: 2,
+                      backgroundColor: 'rgba(142, 90, 45, 0.1)',
+                      border: '1px solid rgba(142, 90, 45, 0.2)',
+                    }}
+                  >
+                    <Typography 
+                      variant="body1"
+                      sx={{ 
+                        fontSize: '1.1rem',
+                        lineHeight: 1.8,
+                        color: 'rgba(255, 255, 255, 0.9)'
+                      }}
+                    >
+                      {ruling.summary}
+                    </Typography>
+                  </Box>
+
+                  {/* Evidences Section */}
+                  {ruling.evidences?.length > 0 && (
+                    <Box sx={{ mb: 4 }}>
+                      <Typography 
+                        variant="h6" 
+                        color="primary" 
+                        gutterBottom
+                        sx={{ 
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          mb: 2
+                        }}
+                      >
+                        <MenuBookIcon />
+                        Evidence from Quran and Sunnah
+                      </Typography>
+                      
+                      {ruling.evidences.map((evidence, index) => (
+                        <Paper
+                          key={index}
+                          elevation={0}
+                          sx={{
+                            mb: 2,
+                            p: 3,
+                            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                            border: '1px solid rgba(255, 255, 255, 0.05)',
+                            borderRadius: 2,
+                          }}
+                        >
+                          {/* Arabic Text */}
+                          {evidence.arabic && (
+                            <Typography 
+                              variant="h6" 
+                              align="right" 
+                              paragraph
+                              className="arabic-text"
+                              sx={{ 
+                                mb: 2,
+                                lineHeight: 2,
+                                fontSize: '1.8rem',
+                                color: theme.palette.primary.light
+                              }}
+                            >
+                              {evidence.arabic}
+                            </Typography>
+                          )}
+                          
+                          {/* Translation */}
+                          <Typography 
+                            variant="body1" 
+                            paragraph
+                            sx={{ 
+                              color: 'rgba(255, 255, 255, 0.9)',
+                              mb: 3,
+                              lineHeight: 1.8
+                            }}
+                          >
+                            {evidence.translation}
+                          </Typography>
+                          
+                          {/* Source and Grade */}
+                          <Box 
+                            sx={{ 
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              pt: 1,
+                              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                            }}
+                          >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
+                              <MenuBookIcon 
+                                fontSize="small" 
+                                sx={{ 
+                                  color: evidence.source?.toLowerCase().includes('quran') ? '#4CAF50' : '#8E5A2D' 
+                                }} 
+                              />
+                              <Typography 
+                                variant="body2" 
+                                color="text.secondary"
+                              >
+                                {evidence.source}
+                              </Typography>
+                              {generateReferenceLink(evidence.source) && (
+                                <Link
+                                  href={generateReferenceLink(evidence.source).url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    color: evidence.source?.toLowerCase().includes('quran') ? '#4CAF50' : theme.palette.primary.light,
+                                    textDecoration: 'none',
+                                    fontSize: '0.8rem',
+                                    ml: 1,
+                                    '&:hover': {
+                                      textDecoration: 'underline',
+                                    }
+                                  }}
+                                >
+                                  {generateReferenceLink(evidence.source).label}
+                                  <LaunchIcon sx={{ ml: 0.5, fontSize: '0.9rem' }} />
+                                </Link>
+                              )}
+                            </Box>
+                            {evidence.grade && !evidence.source?.toLowerCase().includes('quran') && (
+                              <Chip 
+                                label={evidence.grade}
+                                size="small"
+                                color={getHadithGradeColor(evidence.grade)}
+                                sx={{ ml: 1 }}
+                              />
+                            )}
+                          </Box>
+                        </Paper>
+                      ))}
+                    </Box>
+                  )}
+
+                  {/* Scholars' Opinions Section */}
+                  {ruling.scholarOpinions?.length > 0 && (
+                    <Box sx={{ mb: 4 }}>
+                      <Typography 
+                        variant="h6" 
+                        color="primary" 
+                        gutterBottom
+                        sx={{ 
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          mb: 2
+                        }}
+                      >
+                        <PersonIcon />
+                        Scholarly Views
+                      </Typography>
+                      
+                      {ruling.scholarOpinions.map((opinion, index) => (
+                        <Paper
+                          key={index}
+                          elevation={0}
+                          sx={{
+                            mb: 2,
+                            p: 2.5,
+                            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                            border: '1px solid rgba(255, 255, 255, 0.05)',
+                            borderRadius: 2,
+                          }}
+                        >
+                          <Typography 
+                            variant="subtitle2" 
+                            color="primary"
+                            sx={{ mb: 1 }}
+                          >
+                            {opinion.scholar}
+                          </Typography>
+                          <Typography 
+                            variant="body2"
+                            sx={{ 
+                              color: 'rgba(255, 255, 255, 0.8)',
+                              lineHeight: 1.7
+                            }}
+                          >
+                            {opinion.opinion}
+                          </Typography>
+                        </Paper>
+                      ))}
+                    </Box>
+                  )}
+
+                  {/* Additional Notes Section */}
+                  {ruling.notes && (
+                    <Box 
+                      sx={{ 
+                        mb: 4,
+                        p: 3,
+                        borderRadius: 2,
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                      }}
+                    >
+                      <Typography 
+                        variant="h6" 
+                        color="primary" 
+                        gutterBottom
+                        sx={{ 
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          mb: 2
+                        }}
+                      >
+                        <FormatQuoteIcon />
+                        Important Notes
+                      </Typography>
+                      <Typography 
+                        variant="body2"
+                        sx={{ 
+                          color: 'rgba(255, 255, 255, 0.8)',
+                          lineHeight: 1.7
+                        }}
+                      >
+                        {ruling.notes}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {/* References Section */}
+                  {ruling.references?.length > 0 && (
+                    <Box sx={{ mt: 3 }}>
+                      <Typography 
+                        variant="subtitle2" 
+                        color="primary" 
+                        gutterBottom
+                      >
+                        Additional References:
+                      </Typography>
+                      <Box 
+                        sx={{ 
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 1,
+                          mt: 1
+                        }}
+                      >
+                        {ruling.references.map((reference, index) => (
+                          <Chip
+                            key={index}
+                            label={reference}
+                            size="small"
+                            sx={{ 
+                              backgroundColor: 'rgba(142, 90, 45, 0.1)',
+                              borderColor: 'rgba(142, 90, 45, 0.2)',
+                              color: 'rgba(255, 255, 255, 0.8)'
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+
+                  {/* Feedback Section */}
+                  <Box 
+                    sx={{ 
+                      mt: 4,
+                      pt: 2,
+                      borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <Typography 
+                      variant="caption" 
+                      color="text.secondary"
+                    >
+                      Note: For complex matters, please consult with a qualified scholar in your area.
+                    </Typography>
                     <Link
                       component="button"
                       onClick={handleOpenFeedbackDialog}
@@ -1037,7 +1484,7 @@ Shared via Taqdeer.app
                       Report an issue
                     </Link>
                   </Box>
-                </Box>
+                </>
               )}
             </CardContent>
           </Card>

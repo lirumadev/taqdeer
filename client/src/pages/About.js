@@ -32,12 +32,12 @@ const About = () => {
   const features = [
     {
       title: 'Authentic Sources',
-      description: 'All du\'as are sourced from the Quran and sahih (authentic) hadith collections.',
+      description: 'All rulings and du\'as are sourced from the Quran, authentic hadith collections, and trusted scholarly works.',
       icon: <MenuBookIcon fontSize="large" sx={{ color: theme.palette.primary.main }} />
     },
     {
-      title: 'Accurate Translations',
-      description: 'Carefully translated to preserve the original meaning and context.',
+      title: 'Comprehensive Guidance',
+      description: 'Access both Islamic rulings with scholarly opinions and authentic du\'as for your daily life.',
       icon: <TranslateIcon fontSize="large" sx={{ color: theme.palette.primary.main }} />
     },
     {
@@ -48,11 +48,11 @@ const About = () => {
   ];
 
   const principles = [
-    'Adherence to authentic Islamic sources',
+    'Strict adherence to authentic Islamic sources',
     'Respect for diverse Islamic scholarly opinions',
-    'Commitment to accuracy in translation',
+    'Clear presentation of evidence and references',
     'Accessibility for Muslims of all backgrounds',
-    'Continuous improvement based on user feedback'
+    'Continuous improvement based on scholarly guidance and user feedback'
   ];
 
   return (
@@ -154,7 +154,7 @@ const About = () => {
               color: 'text.secondary'
             }}
           >
-            Discover our mission to make authentic Islamic du'as accessible to everyone through modern technology.
+            Discover our mission to make authentic Islamic knowledge and guidance accessible to everyone through modern technology.
           </Typography>
         </Box>
 
@@ -176,11 +176,11 @@ const About = () => {
           </Box>
           
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary', mb: 3 }}>
-            Taqdeer was created with a simple yet profound mission: to help Muslims connect with their faith through authentic du'as (supplications) that are relevant to their daily lives and challenges.
+            Taqdeer was created with a profound mission: to help Muslims access authentic Islamic knowledge, including both rulings (ahkam) and supplications (du'as), that are relevant to their daily lives and challenges.
           </Typography>
           
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
-            In a world where misinformation is common, we strive to provide a reliable source of Islamic supplications directly from the Quran and authentic hadith collections. Our AI-powered platform makes it easy to find the right du'a for any situation, while ensuring accuracy and authenticity.
+            In a world where misinformation is common, we strive to provide a reliable source of Islamic guidance directly from the Quran, authentic hadith collections, and trusted scholarly works. Our platform makes it easy to find both rulings on various matters and appropriate du'as for any situation, while ensuring accuracy and authenticity.
           </Typography>
           
           <Box sx={{ mt: 4 }}>
@@ -268,15 +268,15 @@ const About = () => {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <CodeIcon color="primary" sx={{ mr: 2, fontSize: 32 }} />
-            <Typography variant="h5" color="primary">Our Technology</Typography>
+            <Typography variant="h5" color="primary">Our Approach</Typography>
           </Box>
           
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
-            Taqdeer combines modern AI technology with traditional Islamic scholarship. Our platform uses advanced natural language processing to understand your needs and match them with relevant du'as from authentic sources.
+            Taqdeer combines traditional Islamic scholarship with modern technology to make authentic knowledge easily accessible. Our platform is designed to help you find relevant rulings and du'as from verified sources quickly and efficiently.
           </Typography>
           
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
-            We continuously refine our system based on user feedback and scholarly input to ensure the highest level of accuracy and relevance. Our commitment to technological excellence is matched only by our dedication to Islamic authenticity.
+            We continuously refine our system based on scholarly input and user feedback to ensure the highest level of accuracy and relevance. Our commitment to technological excellence is matched by our dedication to Islamic authenticity.
           </Typography>
         </Paper>
 
@@ -294,11 +294,11 @@ const About = () => {
           </Typography>
           
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary', maxWidth: '700px', mx: 'auto' }}>
-            Taqdeer was created by a solo Muslim developer from Malaysia 🇲🇾 with a passion for combining technology with Islamic knowledge.
+            Taqdeer was created by a Muslim developer from Malaysia 🇲🇾 with a commitment to making authentic Islamic knowledge accessible through technology.
           </Typography>
           
           <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic', mt: 3 }}>
-            "Our goal is to make it easy for every Muslim to find the right du'a for any moment in their life, directly from authentic sources."
+            "Our goal is to make it easy for every Muslim to find authentic Islamic guidance and du'as for any moment in their life, directly from reliable sources."
           </Typography>
         </Box>
       </Container>

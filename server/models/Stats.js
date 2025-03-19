@@ -13,6 +13,14 @@ const StatsSchema = new mongoose.Schema({
     type: Number,
     default: 0 // Starting with zero
   },
+  rulingsGenerated: {
+    type: Number,
+    default: 0
+  },
+  rulingsShared: {
+    type: Number,
+    default: 0
+  },
   lastUpdated: {
     type: Date,
     default: Date.now
@@ -47,6 +55,21 @@ StatsSchema.statics.incrementDuasGenerated = async function() {
 StatsSchema.statics.incrementDuasShared = async function() {
   const stats = await this.getSingletonStats();
   stats.duasShared += 1;
+  stats.lastUpdated = Date.now();
+  return await stats.save();
+};
+
+// New methods for rulings
+StatsSchema.statics.incrementRulingsGenerated = async function() {
+  const stats = await this.getSingletonStats();
+  stats.rulingsGenerated += 1;
+  stats.lastUpdated = Date.now();
+  return await stats.save();
+};
+
+StatsSchema.statics.incrementRulingsShared = async function() {
+  const stats = await this.getSingletonStats();
+  stats.rulingsShared += 1;
   stats.lastUpdated = Date.now();
   return await stats.save();
 };

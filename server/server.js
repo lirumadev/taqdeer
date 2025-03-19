@@ -327,6 +327,148 @@ app.post('/api/feedback', async (req, res) => {
   }
 });
 
+// Islamic ruling search endpoint
+app.post('/api/ruling/search', async (req, res) => {
+  try {
+    const startTime = Date.now();
+    const { query } = req.body;
+    
+    if (!query) {
+      return res.status(400).json({ error: 'Query is required' });
+    }
+    
+    console.log(`[Ruling Search] Starting search for query: "${query}"`);
+    console.log(`[Ruling Search] Constructing prompt...`);
+    
+    const prompt = `
+      Provide an Islamic ruling or answer based on the following question:
+      "${query}"
+      
+      Important guidelines:
+      1. Only provide rulings based on authentic sources from the Quran and sahih hadith. If there are differing opinions among scholars, mention them.
+      
+      2. Format the response as a JSON object with the following structure:
+      {
+        "title": "Clear title summarizing the ruling",
+        "summary": "Brief, clear summary of the ruling",
+        "evidences": [
+          {
+            "arabic": "Arabic text of Quran/hadith evidence (if applicable)",
+            "translation": "English translation of the evidence",
+            "source": "Source with specific reference",
+            "grade": "Authentication grade for hadith (if applicable)"
+          }
+        ],
+        "scholarOpinions": [
+          {
+            "scholar": "Name of the scholar/school",
+            "opinion": "Their ruling/opinion on this matter"
+          }
+        ],
+        "notes": "Additional important notes or context",
+        "references": [
+          "Additional reference sources"
+        ]
+      }`;
+
+    console.log(`[Ruling Search] Prompt constructed. Making OpenAI API call...`);
+    const promptStartTime = Date.now();
+
+    try {
+      const completion = await openai.createChatCompletion({
+        model: "gpt-4o",
+        messages: [
+          { 
+            role: "system", 
+            content: "You are a knowledgeable Islamic scholar who provides rulings based on authentic sources from Quran and Hadith (preferrably from Quran.com for Quran and Sunnah.com for hadith). You present information clearly with proper evidences and scholarly opinions when applicable. You are careful to note when matters require further scholarly consultation." 
+          },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      });
+
+      const promptDuration = Date.now() - promptStartTime;
+      console.log(`[Ruling Search] OpenAI API call completed in ${promptDuration}ms`);
+      
+      if (!completion.data || !completion.data.choices || !completion.data.choices[0]) {
+        console.error('[Ruling Search] Invalid response structure from OpenAI:', completion.data);
+        throw new Error('Invalid response from OpenAI API');
+      }
+
+      // Parse the response as JSON
+      const responseText = completion.data.choices[0].message.content.trim();
+      console.log(`[Ruling Search] Raw response length: ${responseText.length} characters`);
+      console.log(`[Ruling Search] Raw response:`, responseText);
+      
+      let rulingData;
+      try {
+        // Handle markdown-formatted JSON
+        let jsonText = responseText;
+        if (jsonText.startsWith('```json') || jsonText.startsWith('```')) {
+          jsonText = jsonText.replace(/^```json\s*|^```\s*/g, '');
+          jsonText = jsonText.replace(/\s*```\s*$/g, '');
+        }
+        
+        rulingData = JSON.parse(jsonText);
+        console.log(`[Ruling Search] Successfully parsed JSON response`);
+        
+        // Ensure all expected fields exist
+        rulingData = {
+          title: rulingData.title || `Ruling on ${query}`,
+          summary: rulingData.summary || "",
+          evidences: rulingData.evidences || [],
+          scholarOpinions: rulingData.scholarOpinions || [],
+          notes: rulingData.notes || null,
+          references: rulingData.references || []
+        };
+        
+      } catch (parseError) {
+        console.error('[Ruling Search] JSON Parse Error:', parseError);
+        console.error('[Ruling Search] Attempted to parse:', jsonText);
+        throw new Error('Failed to parse ruling response');
+      }
+      
+      // Track the ruling generation in stats if needed
+      if (mongoose.connection.readyState === 1) {
+        try {
+          await Stats.incrementRulingsGenerated();
+          console.log(`[Ruling Search] Successfully incremented ruling stats`);
+        } catch (error) {
+          console.error('[Ruling Search] Error incrementing ruling count:', error);
+          // Continue even if tracking fails
+        }
+      }
+      
+      const totalDuration = Date.now() - startTime;
+      console.log(`[Ruling Search] Total request completed in ${totalDuration}ms`);
+      
+      res.json(rulingData);
+    } catch (openaiError) {
+      console.error('[Ruling Search] OpenAI API Error:', {
+        message: openaiError.message,
+        response: openaiError.response?.data,
+        status: openaiError.response?.status,
+        headers: openaiError.response?.headers
+      });
+      throw new Error(`OpenAI API Error: ${openaiError.message}`);
+    }
+  } catch (error) {
+    console.error('[Ruling Search] Error generating ruling:', error);
+    console.error('[Ruling Search] Error details:', {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
+    res.status(500).json({ 
+      error: 'Failed to generate ruling', 
+      details: error.message,
+      type: error.name 
+    });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

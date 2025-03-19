@@ -1,42 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <!-- Homepage -->
   <url>
     <loc>https://taqdeer.app/</loc>
-    <lastmod>2025-03-10</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>2025-03-20</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://taqdeer.app/logo.png</image:loc>
+      <image:title>Taqdeer - Islamic Rulings &amp; Du'a Platform</image:title>
+    </image:image>
   </url>
   
   <!-- About Page -->
   <url>
     <loc>https://taqdeer.app/about</loc>
-    <lastmod>2025-03-09</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>2025-03-20</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <!-- Contact Page -->
   <url>
     <loc>https://taqdeer.app/contact</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   
-  <!-- Privacy Policy (if you have one) -->
+  <!-- Privacy Policy -->
   <url>
     <loc>https://taqdeer.app/privacy</loc>
-    <lastmod>2025-03-09</lastmod>
-    <changefreq>yearly</changefreq>
+    <lastmod>2025-03-20</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   
-  <!-- Terms of Service (if you have one) -->
+  <!-- Terms of Service -->
   <url>
     <loc>https://taqdeer.app/terms</loc>
-    <lastmod>2025-03-09</lastmod>
-    <changefreq>yearly</changefreq>
+    <lastmod>2025-03-20</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 </urlset> 

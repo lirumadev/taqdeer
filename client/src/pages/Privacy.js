@@ -27,10 +27,10 @@ const Privacy = () => {
       }}
     >
       <SEO 
-        title="Privacy Policy - Taqdeer"
-        description="Learn how Taqdeer protects your privacy and handles your data. Our privacy policy explains what information we collect and how we use it."
-        canonicalUrl="/privacy"
-        keywords="taqdeer privacy policy, islamic app privacy, dua generator data protection"
+        title="Privacy Policy - Taqdeer | Secure Islamic Guidance Platform"
+        description="Learn how Taqdeer protects your privacy while providing authentic Islamic rulings and du'as. We prioritize data security and respect Islamic principles in handling your information."
+        canonicalUrl="https://taqdeer.app/privacy"
+        keywords="islamic app privacy, muslim data protection, taqdeer privacy policy, secure islamic platform, halal app privacy, shariah compliant privacy"
       />
       
       <Container maxWidth="md">
@@ -91,16 +91,16 @@ const Privacy = () => {
             Information We Collect
           </Typography>
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
-            <strong>Du'a Queries:</strong> When you use our du'a generator, we process your queries to provide relevant du'as. These queries are not stored with any personally identifiable information.
+            <strong>Search Queries:</strong> When you use our Islamic rulings search or du'a search features, we process your queries to provide relevant responses. These queries are processed securely and are not stored with any personally identifiable information.
           </Typography>
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
-            <strong>Feedback Information:</strong> If you submit feedback about a du'a, we collect the feedback type, your comments, and the du'a data to improve our service.
+            <strong>Feedback Information:</strong> If you submit feedback about a ruling or du'a, we collect the feedback type, your comments, and the associated content to improve our service and accuracy.
           </Typography>
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
-            <strong>Contact Information:</strong> When you contact us through our contact form, we collect your name, email address, and message content.
+            <strong>Usage Statistics:</strong> We collect anonymous usage statistics such as the number of searches performed and content shared to improve our service quality. This data is aggregated and contains no personal information.
           </Typography>
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
-            <strong>Usage Data:</strong> We collect anonymous usage data such as browser type, device information, and pages visited to improve our service.
+            <strong>Technical Data:</strong> We collect basic technical information such as browser type, device information, and pages visited to ensure optimal performance and compatibility.
           </Typography>
 
           <Typography variant="h6" color="primary" gutterBottom sx={{ mt: 4 }}>
@@ -108,19 +108,19 @@ const Privacy = () => {
           </Typography>
           <List sx={{ color: 'text.secondary' }}>
             <ListItem>
-              <ListItemText primary="To provide and maintain our service" />
+              <ListItemText primary="To provide accurate Islamic rulings and du'as based on your queries" />
             </ListItem>
             <ListItem>
-              <ListItemText primary="To improve the accuracy and relevance of du'as" />
+              <ListItemText primary="To improve the relevance and accuracy of our search results" />
             </ListItem>
             <ListItem>
-              <ListItemText primary="To respond to your inquiries and support requests" />
+              <ListItemText primary="To enhance the user experience and interface" />
             </ListItem>
             <ListItem>
-              <ListItemText primary="To monitor usage patterns and improve user experience" />
+              <ListItemText primary="To maintain and improve our service performance" />
             </ListItem>
             <ListItem>
-              <ListItemText primary="To address technical issues and maintain security" />
+              <ListItemText primary="To ensure the security and reliability of our platform" />
             </ListItem>
           </List>
 
@@ -128,42 +128,66 @@ const Privacy = () => {
             Data Security
           </Typography>
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
-            We implement appropriate security measures to protect your personal information. However, no method of transmission over the Internet or electronic storage is 100% secure, and we cannot guarantee absolute security.
+            We implement industry-standard security measures to protect your information. Your queries and feedback are processed securely, and we do not store personally identifiable information. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security.
           </Typography>
 
           <Typography variant="h6" color="primary" gutterBottom sx={{ mt: 4 }}>
             Third-Party Services
           </Typography>
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
-            We use OpenAI's API to generate du'as. Your queries are processed according to OpenAI's privacy policy. We do not share your personal information with OpenAI or other third parties except as necessary to provide our services.
+            We use trusted third-party services to process search queries and maintain our platform, including:
+          </Typography>
+          <List sx={{ color: 'text.secondary' }}>
+            <ListItem>
+              <ListItemText 
+                primary="OpenAI API" 
+                secondary="Used to process search queries and generate structured responses. Queries are processed securely and are not used for any purpose other than providing relevant Islamic content. No personal information is shared with OpenAI." 
+              />
+            </ListItem>
+            <ListItem>
+              <ListItemText 
+                primary="Infrastructure Services" 
+                secondary="We use reliable hosting and database services to ensure platform stability and data security." 
+              />
+            </ListItem>
+          </List>
+          <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
+            These services are carefully selected and bound by strict privacy requirements. We do not share your personal information with third parties except as necessary to provide our services.
           </Typography>
 
           <Typography variant="h6" color="primary" gutterBottom sx={{ mt: 4 }}>
-            Cookies and Tracking
+            Cookies and Local Storage
           </Typography>
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
-            We use cookies and similar tracking technologies to enhance your experience on our website. You can set your browser to refuse all or some browser cookies, but this may affect certain features of our service.
+            We use cookies and local storage to enhance your experience and maintain your preferences. These are used to remember your settings and improve performance. You can manage cookie preferences through your browser settings, though this may affect certain features of our service.
+          </Typography>
+
+          <Typography variant="h6" color="primary" gutterBottom sx={{ mt: 4 }}>
+            Content Sharing
+          </Typography>
+          <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
+            When you choose to share rulings or du'as, the shared content includes only the Islamic knowledge and references, never your personal information or search history. Image sharing features generate new images without storing personal data.
           </Typography>
 
           <Typography variant="h6" color="primary" gutterBottom sx={{ mt: 4 }}>
             Children's Privacy
           </Typography>
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
-            Our service is not directed to anyone under the age of 13. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us.
+            While our content is suitable for all ages, our service is not specifically directed to children under 13. We do not knowingly collect or maintain information from children under 13. If you believe a child has provided us with personal information, please contact us for immediate removal.
           </Typography>
 
           <Typography variant="h6" color="primary" gutterBottom sx={{ mt: 4 }}>
-            Changes to This Privacy Policy
+            Updates to Privacy Policy
           </Typography>
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
-            We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date.
+            We may update this Privacy Policy as our services evolve. Any changes will be posted on this page with an updated date. Significant changes will be notified through our website. Your continued use of our service after changes indicates acceptance of the updated policy.
           </Typography>
 
           <Typography variant="h6" color="primary" gutterBottom sx={{ mt: 4 }}>
             Contact Us
           </Typography>
           <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
-            If you have any questions about this Privacy Policy, please contact us through our Contact page.
+            If you have questions about this Privacy Policy or how we handle your information, please contact us through our Contact page. We are committed to addressing your concerns promptly and transparently.
           </Typography>
         </Paper>
       </Container>
