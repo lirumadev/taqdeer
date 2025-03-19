@@ -300,8 +300,8 @@ Shared via Taqdeer.app
   const generateReferenceLink = (source) => {
     if (!source) return null;
     
-    // Check if it's a Quran reference - updated regex to be more flexible
-    const quranMatch = source.match(/(?:Quran|Qur'an|القرآن)\s*(\d+):(\d+)/i);
+    // Quran references
+    const quranMatch = source.match(/(?:Quran|Qur'an|القرآن)(?:[,\s]+)?(?:Surah\s+[^(\d]+)?[\s(]?(\d+):(\d+)/i);
     if (quranMatch) {
       const [_, surah, ayah] = quranMatch;
       return {
@@ -311,8 +311,9 @@ Shared via Taqdeer.app
       };
     }
     
-    // Check for Sahih Bukhari
-    const bukhariMatch = source.match(/Sahih al-Bukhari\s+(\d+)/i) || source.match(/Bukhari\s+(\d+)/i);
+    // 1. Sahih Collections
+    // Sahih Bukhari
+    const bukhariMatch = source.match(/(?:Sahih\s+(?:al-)?Bukhari|Bukhari)(?:[,\s]+)?(?:Book\s+\d+[,\s]+)?(?:Hadith\s+)?#?\s*(\d+)/i);
     if (bukhariMatch) {
       const [_, hadithNumber] = bukhariMatch;
       return {
@@ -321,9 +322,9 @@ Shared via Taqdeer.app
         isQuran: false
       };
     }
-    
-    // Check for Sahih Muslim
-    const muslimMatch = source.match(/Sahih Muslim\s+(\d+)/i) || source.match(/Muslim\s+(\d+)/i);
+
+    // Sahih Muslim
+    const muslimMatch = source.match(/(?:Sahih\s+Muslim|Muslim)(?:[,\s]+)?(?:Book\s+\d+[,\s]+)?(?:Hadith\s+)?#?\s*(\d+)/i);
     if (muslimMatch) {
       const [_, hadithNumber] = muslimMatch;
       return {
@@ -332,31 +333,21 @@ Shared via Taqdeer.app
         isQuran: false
       };
     }
-    
-    // Check for Sunan Abu Dawood
-    const abuDawoodMatch = source.match(/Sunan Abu Da(w|v)ood\s+(\d+)/i) || source.match(/Abu Da(w|v)ood\s+(\d+)/i);
+
+    // 2. Sunan Collections
+    // Sunan Abu Dawud
+    const abuDawoodMatch = source.match(/(?:Sunan\s+)?(?:Abi|Abu)\s+Da(?:w|v)ood(?:[,\s]+)?(?:Book\s+\d+[,\s]+)?(?:Hadith\s+)?#?\s*(\d+)/i);
     if (abuDawoodMatch) {
-      const hadithNumber = abuDawoodMatch[2];
+      const [_, hadithNumber] = abuDawoodMatch;
       return {
         url: `https://sunnah.com/abudawud:${hadithNumber}`,
         label: 'View on Sunnah.com',
         isQuran: false
       };
     }
-    
-    // Check for Jami at-Tirmidhi
-    const tirmidhiMatch = source.match(/Jami[' ]at-Tirmidhi\s+(\d+)/i) || source.match(/Tirmidhi\s+(\d+)/i);
-    if (tirmidhiMatch) {
-      const [_, hadithNumber] = tirmidhiMatch;
-      return {
-        url: `https://sunnah.com/tirmidhi:${hadithNumber}`,
-        label: 'View on Sunnah.com',
-        isQuran: false
-      };
-    }
-    
-    // Check for Sunan an-Nasa'i
-    const nasaiMatch = source.match(/Sunan an-Nasa['i]\s+(\d+)/i) || source.match(/Nasa['i]\s+(\d+)/i);
+
+    // Sunan an-Nasa'i
+    const nasaiMatch = source.match(/(?:Sunan\s+)?(?:an-)?Nasa['i](?:[,\s]+)?(?:Book\s+\d+[,\s]+)?(?:Hadith\s+)?#?\s*(\d+)/i);
     if (nasaiMatch) {
       const [_, hadithNumber] = nasaiMatch;
       return {
@@ -365,9 +356,9 @@ Shared via Taqdeer.app
         isQuran: false
       };
     }
-    
-    // Check for Sunan Ibn Majah
-    const ibnMajahMatch = source.match(/Sunan Ibn Majah\s+(\d+)/i) || source.match(/Ibn Majah\s+(\d+)/i);
+
+    // Sunan Ibn Majah
+    const ibnMajahMatch = source.match(/(?:Sunan\s+)?Ibn\s+Majah(?:[,\s]+)?(?:Book\s+\d+[,\s]+)?(?:Hadith\s+)?#?\s*(\d+)/i);
     if (ibnMajahMatch) {
       const [_, hadithNumber] = ibnMajahMatch;
       return {
@@ -376,9 +367,21 @@ Shared via Taqdeer.app
         isQuran: false
       };
     }
-    
-    // Check for Muwatta Malik
-    const malikMatch = source.match(/Muwatta Malik\s+(\d+)/i) || source.match(/Malik\s+(\d+)/i);
+
+    // Sunan at-Tirmidhi
+    const tirmidhiMatch = source.match(/(?:Jami['']|Sunan)\s+(?:at-)?Tirmidhi(?:[,\s]+)?(?:Book\s+\d+[,\s]+)?(?:Hadith\s+)?#?\s*(\d+)/i);
+    if (tirmidhiMatch) {
+      const [_, hadithNumber] = tirmidhiMatch;
+      return {
+        url: `https://sunnah.com/tirmidhi:${hadithNumber}`,
+        label: 'View on Sunnah.com',
+        isQuran: false
+      };
+    }
+
+    // 3. Other Major Collections
+    // Muwatta Malik
+    const malikMatch = source.match(/(?:Al-?)?Muwatta(?:['']?\s+Malik)?(?:[,\s]+)?(?:Book\s+\d+[,\s]+)?(?:Hadith\s+)?#?\s*(\d+)/i);
     if (malikMatch) {
       const [_, hadithNumber] = malikMatch;
       return {
@@ -387,9 +390,21 @@ Shared via Taqdeer.app
         isQuran: false
       };
     }
-    
-    // Check for Riyad as-Salihin
-    const riyadMatch = source.match(/Riyad as-Salihin\s+(\d+)/i);
+
+    // Musnad Ahmad
+    const ahmadMatch = source.match(/(?:Musnad\s+)?Ahmad(?:[,\s]+)?(?:Book\s+\d+[,\s]+)?(?:Hadith\s+)?#?\s*(\d+)/i);
+    if (ahmadMatch) {
+      const [_, hadithNumber] = ahmadMatch;
+      return {
+        url: `https://sunnah.com/ahmad:${hadithNumber}`,
+        label: 'View on Sunnah.com',
+        isQuran: false
+      };
+    }
+
+    // 4. Later Collections
+    // Riyad as-Salihin
+    const riyadMatch = source.match(/Riyad(?:h|\s+)(?:us|as)-?Sali(?:h|k)in(?:[,\s]+)?(?:Book\s+\d+[,\s]+)?(?:Hadith\s+)?#?\s*(\d+)/i);
     if (riyadMatch) {
       const [_, hadithNumber] = riyadMatch;
       return {
@@ -398,11 +413,32 @@ Shared via Taqdeer.app
         isQuran: false
       };
     }
-    
+
+    // 40 Hadith Nawawi
+    const nawawiMatch = source.match(/(?:40|Forty|Al-Arba['']in)\s+(?:Hadith\s+)?(?:an-)?Nawawi(?:[,\s]+)?(?:Hadith\s+)?#?\s*(\d+)/i);
+    if (nawawiMatch) {
+      const [_, hadithNumber] = nawawiMatch;
+      return {
+        url: `https://sunnah.com/nawawi40:${hadithNumber}`,
+        label: 'View on Sunnah.com',
+        isQuran: false
+      };
+    }
+
+    // Bulugh al-Maram
+    const bulughMatch = source.match(/Bulugh\s+(?:al-)?Maram(?:[,\s]+)?(?:Book\s+\d+[,\s]+)?(?:Hadith\s+)?#?\s*(\d+)/i);
+    if (bulughMatch) {
+      const [_, hadithNumber] = bulughMatch;
+      return {
+        url: `https://sunnah.com/bulugh:${hadithNumber}`,
+        label: 'View on Sunnah.com',
+        isQuran: false
+      };
+    }
+
     // Generic hadith search as fallback
     const genericHadithMatch = source.match(/hadith/i);
     if (genericHadithMatch) {
-      // Create a search query from the source text
       const searchQuery = encodeURIComponent(source.replace(/\|.*$/, '').trim());
       return {
         url: `https://sunnah.com/search?q=${searchQuery}`,
@@ -1411,40 +1447,6 @@ Shared via Taqdeer.app
                       >
                         {ruling.notes}
                       </Typography>
-                    </Box>
-                  )}
-
-                  {/* References Section */}
-                  {ruling.references?.length > 0 && (
-                    <Box sx={{ mt: 3 }}>
-                      <Typography 
-                        variant="subtitle2" 
-                        color="primary" 
-                        gutterBottom
-                      >
-                        Additional References:
-                      </Typography>
-                      <Box 
-                        sx={{ 
-                          display: 'flex',
-                          flexWrap: 'wrap',
-                          gap: 1,
-                          mt: 1
-                        }}
-                      >
-                        {ruling.references.map((reference, index) => (
-                          <Chip
-                            key={index}
-                            label={reference}
-                            size="small"
-                            sx={{ 
-                              backgroundColor: 'rgba(142, 90, 45, 0.1)',
-                              borderColor: 'rgba(142, 90, 45, 0.2)',
-                              color: 'rgba(255, 255, 255, 0.8)'
-                            }}
-                          />
-                        ))}
-                      </Box>
                     </Box>
                   )}
 
