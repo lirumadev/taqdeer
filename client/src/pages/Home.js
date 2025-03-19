@@ -623,9 +623,9 @@ Shared via Taqdeer.app
                   }}
                 />
                 <Chip 
-                  label="How to perform wudu correctly?" 
+                  label="What are the Sunnah of eating?" 
                   size="small" 
-                  onClick={() => setQuery("How to perform wudu correctly?")}
+                  onClick={() => setQuery("What are the Sunnah of eating?")}
                   sx={{ 
                     backgroundColor: 'rgba(142, 90, 45, 0.1)',
                     '&:hover': { backgroundColor: 'rgba(142, 90, 45, 0.2)' }
