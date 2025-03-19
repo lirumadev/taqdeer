@@ -1,29 +1,35 @@
-# Taqdeer - AI-Powered Islamic Du'a Generator
+# Taqdeer - Islamic Rulings & Du'a Guide
 
-Taqdeer is an application that provides authentic Islamic du'as (supplications) from the Quran and Hadith based on user queries. It uses AI to match user situations with relevant du'as, complete with Arabic text, transliteration, translation, and source references.
+Taqdeer is an application that provides authentic Islamic rulings and du'as from the Quran, Hadith, and trusted scholarly works. Users can search for Islamic guidance on various matters and find relevant du'as with complete references, translations, and transliterations. The platform uses advanced search technology to match queries with verified Islamic content while ensuring all responses are based on authentic sources.
 
 ## Features
 
-- AI-powered du'a recommendations based on user situations
-- Authentic sources from Quran and Hadith
-- Arabic text with transliteration and translation
-- Source references with links to Quran.com and Sunnah.com
-- Image sharing capability
-- User feedback system
+- Comprehensive Islamic rulings with scholarly opinions and evidence
+- Authentic du'as with Arabic text, transliteration, and translation
+- Direct source references from Quran and verified Hadith collections
+- Links to Quran.com and Sunnah.com for verification
+- Image sharing capability for du'as
+- User feedback system for continuous improvement
+- Privacy-focused design
+- Advanced search powered by OpenAI technology (for query processing only)
 
 ## Technology Stack
 
 - Frontend: React, Material-UI
 - Backend: Node.js, Express
 - Database: MongoDB
-- AI: OpenAI API
+- Search Processing: OpenAI API (for query understanding)
+
+## Note on Search Technology
+
+While Taqdeer uses OpenAI's technology to process and understand user queries, all Islamic content, rulings, and du'as are sourced directly from authentic Islamic texts and scholarly works. The AI technology is used solely to improve search accuracy and query understanding, not for generating Islamic content.
 
 ## Local Development Setup
 
 ### Prerequisites
 - Node.js
 - MongoDB
-- OpenAI API key
+- OpenAI API key (for search processing)
 
 ### Installation
 
@@ -46,16 +52,6 @@ Taqdeer is an application that provides authentic Islamic du'as (supplications) 
 
 3. Create environment variables
    ```
-   # In the server directory, create a .env file with:
-   MONGODB_URI=your_mongodb_connection_string
-   OPENAI_API_KEY=your_openai_api_key
-   PORT=5000
-   EMAIL_HOST=smtp.gmail.com
-   EMAIL_PORT=587
-   EMAIL_SECURE=false
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASS=your_app_password
-   EMAIL_FROM=your_email@gmail.com
    ```
 
 4. Start the application
@@ -87,7 +83,7 @@ Taqdeer is an application that provides authentic Islamic du'as (supplications) 
    - Set the start command to `npm start`
 4. Add environment variables:
    - MONGODB_URI
-   - OPENAI_API_KEY
+   - OPENAI_API_KEY (for search processing)
    - EMAIL_HOST
    - EMAIL_PORT
    - EMAIL_SECURE

@@ -2,10 +2,10 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 const SEO = ({ 
-  title = 'Taqdeer - AI-Powered Islamic Du\'a Generator',
-  description = 'Find authentic du\'as from Quran and Hadith for any situation. Taqdeer uses AI to provide personalized Islamic supplications with references and translations.',
+  title = 'Taqdeer - Islamic Rulings & Du\'a Guide',
+  description = 'Find authentic Islamic rulings and du\'as from Quran and Hadith with scholarly references and translations.',
   canonicalUrl,
-  keywords = 'islamic dua, dua generator, islamic supplications, quran dua, hadith dua, muslim prayers, authentic duas',
+  keywords = 'islamic rulings, islamic dua, islamic guidance, quran dua, hadith dua, muslim prayers, authentic duas, islamic knowledge',
   ogImage = '/og-image.jpg',
   ogType = 'website',
   twitterCard = 'summary_large_image'

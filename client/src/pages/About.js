@@ -79,15 +79,15 @@ const About = () => {
                 "name": "What is Taqdeer?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Taqdeer is an AI-powered Islamic du'a generator that helps Muslims find authentic supplications from the Quran and Hadith based on their specific situations, needs, or feelings."
+                  "text": "Taqdeer is an Islamic platform that provides authentic rulings and du'as from the Quran, verified hadith collections, and trusted scholarly works to help Muslims find guidance for their daily lives."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Are the du'as provided by Taqdeer authentic?",
+                "name": "Are the sources authentic?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes, all du'as provided by Taqdeer are sourced from authentic Islamic texts including the Quran and verified Hadith collections. Each du'a includes its source reference."
+                  "text": "Yes, all content on Taqdeer is sourced from authentic Islamic texts including the Quran, verified hadith collections, and trusted scholarly works. Each ruling and du'a includes its source reference for verification."
                 }
               },
               {
@@ -95,7 +95,7 @@ const About = () => {
                 "name": "How does Taqdeer work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Taqdeer uses advanced AI technology to understand your query and match it with relevant du'as from authentic Islamic sources. It provides the Arabic text, transliteration, translation, and source reference for each du'a."
+                  "text": "Taqdeer matches your query with relevant Islamic rulings and du'as from authentic sources. For rulings, it provides scholarly opinions with evidence. For du'as, it provides the Arabic text, transliteration, translation, and source references."
                 }
               },
               {
@@ -103,7 +103,7 @@ const About = () => {
                 "name": "Is Taqdeer free to use?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes, Taqdeer is completely free to use. It was created as a service to the Muslim community to make authentic du'as more accessible."
+                  "text": "Yes, Taqdeer is completely free to use. It was created as a service to the Muslim community to make authentic Islamic knowledge more accessible."
                 }
               },
               {
@@ -111,7 +111,7 @@ const About = () => {
                 "name": "Who created Taqdeer?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Taqdeer was created by a solo Muslim developer from Malaysia 🇲🇾 with a passion for combining technology with Islamic knowledge."
+                  "text": "Taqdeer was created by a Muslim developer from Malaysia 🇲🇾 with a commitment to making authentic Islamic knowledge accessible through technology."
                 }
               }
             ]

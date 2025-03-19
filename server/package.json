@@ -1,7 +1,7 @@
 {
   "name": "taqdeer-server",
   "version": "1.0.0",
-  "description": "Backend for Taqdeer - AI-Powered Personalized Du'a Generator",
+  "description": "Backend for Taqdeer - Islamic Rulings & Du'a Guide",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -9,10 +9,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
+    "islamic-rulings",
     "dua",
     "islam",
-    "ai",
-    "openai"
+    "quran",
+    "hadith"
   ],
   "author": "",
   "license": "ISC",
